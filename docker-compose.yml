@@ -7,7 +7,7 @@ services:
     restart: always
     command: --log-dir /app/logs
     ports:
-      - "3000:3000"
+      - "9996:3000"
     volumes:
       - ./data/oneapi:/data
       - ./logs:/app/logs

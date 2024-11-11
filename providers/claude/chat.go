@@ -99,7 +99,7 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	}
 
 	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
-		headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
+		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	}
 
 	// 创建请求
@@ -128,7 +128,16 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 
 	for _, msg := range request.Messages {
 		if msg.Role == "system" && claudeRequest.System == "" {
-			claudeRequest.System = msg.StringContent()
+			//claudeRequest.System = msg.StringContent()
+			cacheControl := &SystemCacheControl{Type: "ephemeral"}
+			if strings.Contains(msg.StringContent(), "#no_cache") {
+				cacheControl = nil
+			}
+			systemMessage := SystemMessage{
+				Content:      msg.StringContent(),
+				CacheControl: cacheControl,
+			}
+			claudeRequest.System = append(msg.StringContent(), systemMessage)
 			continue
 		}
 		messageContent, err := convertMessageContent(&msg)
