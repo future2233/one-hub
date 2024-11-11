@@ -133,11 +133,10 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 			if strings.Contains(msg.StringContent(), "#no_cache") {
 				cacheControl = nil
 			}
-			systemMessage := SystemMessage{
+			claudeRequest.System = &SystemMessage{
 				Content:      msg.StringContent(),
 				CacheControl: cacheControl,
 			}
-			claudeRequest.System = append(msg.StringContent(), systemMessage)
 			continue
 		}
 		messageContent, err := convertMessageContent(&msg)

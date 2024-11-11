@@ -114,6 +114,15 @@ type ClaudeRequest struct {
 	Stream bool `json:"stream,omitempty"`
 }
 
+type SystemMessage struct {
+	Content      string              `json:"content"`
+	CacheControl *SystemCacheControl `json:"cache_control,omitempty"`
+}
+
+type SystemCacheControl struct {
+	Type string `json:"type"`
+}
+
 type ToolChoice struct {
 	Type                   string `json:"type,omitempty"`
 	Name                   string `json:"name,omitempty"`
