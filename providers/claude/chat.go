@@ -8,6 +8,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/image"
+	"one-api/common/logger"
 	"one-api/common/requester"
 	"one-api/common/utils"
 	"one-api/providers/base"
@@ -101,9 +102,10 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	}
 
 	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
-		fmt.Println("Header 'anthropic-beta' set for caching")
+		logger.SysLog("Header 'anthropic-beta' set for caching...")
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	} else {
+		logger.SysLog("Header 'anthropic-beta' set for caching other...")
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31" // 前缀不匹配
 	}
 
@@ -112,7 +114,8 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	if err != nil {
 		return nil, common.ErrorWrapperLocal(err, "new_request_failed", http.StatusInternalServerError)
 	}
-	fmt.Printf("------------req--------------: %+v\n", req)
+	logger.SysLog(fmt.Sprintf("------------req--------------: %+v", req))
+	//fmt.Printf("------------req--------------: %+v\n", req)
 	return req, nil
 }
 
@@ -181,7 +184,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		toolType, toolFunc := request.ParseToolChoice()
 		claudeRequest.ToolChoice = ConvertToolChoice(toolType, toolFunc)
 	}
-	fmt.Printf("Generated ClaudeRequest: %+v\n", claudeRequest)
+	logger.SysLog(fmt.Sprintf("Generated ClaudeRequest: %+v", claudeRequest)) // 打印生成的请求内容
 	return &claudeRequest, nil
 }
 
