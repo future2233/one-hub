@@ -1,6 +1,7 @@
 package claude
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -85,6 +86,7 @@ func (p *ClaudeProvider) CreateChatCompletionStream(request *types.ChatCompletio
 }
 
 func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Request, *types.OpenAIErrorWithStatusCode) {
+	ctx := context.WithValue(context.Background(), logger.RequestIdKey, "ClaudeTask")
 	url, errWithCode := p.GetSupportedAPIUri(config.RelayModeChatCompletions)
 	if errWithCode != nil {
 		return nil, errWithCode
@@ -102,10 +104,10 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	}
 
 	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
-		logger.Logger.info("Header 'anthropic-beta' set for caching...")
+		logger.LogInfo(ctx, "Header 'anthropic-beta' set for caching...")
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	} else {
-		logger.Logger.info("Header 'anthropic-beta' set for caching other...")
+		logger.LogInfo(ctx, "Header 'anthropic-beta' set for caching other...")
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31" // 前缀不匹配
 	}
 
@@ -114,7 +116,7 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	if err != nil {
 		return nil, common.ErrorWrapperLocal(err, "new_request_failed", http.StatusInternalServerError)
 	}
-	logger.Logger.info(fmt.Sprintf("------------req--------------: %+v", req))
+	logger.LogInfo(ctx, fmt.Sprintf("------------req--------------: %+v", req))
 	//fmt.Printf("------------req--------------: %+v\n", req)
 	return req, nil
 }
@@ -131,6 +133,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		TopP:          request.TopP,
 		Stream:        request.Stream,
 	}
+	ctx := context.WithValue(context.Background(), logger.RequestIdKey, "ClaudeChat")
 
 	var prevUserMessage bool
 
@@ -184,7 +187,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		toolType, toolFunc := request.ParseToolChoice()
 		claudeRequest.ToolChoice = ConvertToolChoice(toolType, toolFunc)
 	}
-	logger.Logger.info(fmt.Sprintf("Generated ClaudeRequest: %+v", claudeRequest)) // 打印生成的请求内容
+	logger.LogInfo(ctx, fmt.Sprintf("Generated ClaudeRequest: %+v", claudeRequest)) // 打印生成的请求内容
 	return &claudeRequest, nil
 }
 
