@@ -31,6 +31,7 @@ type ClaudeStreamHandler struct {
 }
 
 func (p *ClaudeProvider) CreateChatCompletion(request *types.ChatCompletionRequest) (*types.ChatCompletionResponse, *types.OpenAIErrorWithStatusCode) {
+	fmt.Printf("CreateChatCompletion\n")
 	claudeRequest, errWithCode := ConvertFromChatOpenai(request)
 	if errWithCode != nil {
 		return nil, errWithCode
@@ -53,6 +54,7 @@ func (p *ClaudeProvider) CreateChatCompletion(request *types.ChatCompletionReque
 }
 
 func (p *ClaudeProvider) CreateChatCompletionStream(request *types.ChatCompletionRequest) (requester.StreamReaderInterface[string], *types.OpenAIErrorWithStatusCode) {
+	fmt.Printf("CreateChatCompletionStream\n")
 	claudeRequest, errWithCode := ConvertFromChatOpenai(request)
 	if errWithCode != nil {
 		return nil, errWithCode
@@ -99,7 +101,10 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	}
 
 	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
+		fmt.Println("Header 'anthropic-beta' set for caching")
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
+	} else {
+		headers["anthropic-beta"] = "prompt-caching-2024-07-31" // 前缀不匹配
 	}
 
 	// 创建请求
@@ -107,7 +112,7 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	if err != nil {
 		return nil, common.ErrorWrapperLocal(err, "new_request_failed", http.StatusInternalServerError)
 	}
-
+	fmt.Printf("------------req--------------: %+v\n", req)
 	return req, nil
 }
 
@@ -176,7 +181,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		toolType, toolFunc := request.ParseToolChoice()
 		claudeRequest.ToolChoice = ConvertToolChoice(toolType, toolFunc)
 	}
-
+	fmt.Printf("Generated ClaudeRequest: %+v\n", claudeRequest)
 	return &claudeRequest, nil
 }
 
