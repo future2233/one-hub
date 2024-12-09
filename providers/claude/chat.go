@@ -98,11 +98,13 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 		headers["Accept"] = "text/event-stream"
 	}
 
-	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
-		headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
+	if strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
+		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	}
 
 	// 创建请求
+	//jsonBytes, _ := json.Marshal(claudeRequest)
+	//fmt.Println(string(jsonBytes))
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(claudeRequest), p.Requester.WithHeader(headers))
 	if err != nil {
 		return nil, common.ErrorWrapperLocal(err, "new_request_failed", http.StatusInternalServerError)
@@ -116,7 +118,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	claudeRequest := ClaudeRequest{
 		Model:         request.Model,
 		Messages:      make([]Message, 0),
-		System:        "",
+		System:        make([]SystemContent, 0), // 修改为 SystemContent 数组
 		MaxTokens:     defaultMaxTokens(request.MaxTokens),
 		StopSequences: nil,
 		Temperature:   request.Temperature,
@@ -125,7 +127,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	}
 
 	var prevUserMessage bool
-	systemMessage := ""
+	var systemMessage string
 
 	for _, msg := range request.Messages {
 		if msg.Role == "system" {
@@ -156,10 +158,53 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		}
 	}
 
+	// 处理系统消息
 	if systemMessage != "" {
-		claudeRequest.System = systemMessage
+		if len(systemMessage) > 2500 {
+			parts := strings.Split(systemMessage, "、、")
+			if len(parts) > 1 {
+				// 使用、、分隔的第一部分作为主要系统消息
+				claudeRequest.System = []SystemContent{
+					{
+						Type: "text",
+						Text: parts[0],
+					},
+					{
+						Type: "text",
+						Text: strings.Join(parts[1:], ""),
+						CacheControl: &CacheControl{
+							Type: "ephemeral",
+						},
+					},
+				}
+			} else {
+				// 如果没有、、分隔符，取前15个字符作为主要系统消息
+				claudeRequest.System = []SystemContent{
+					{
+						Type: "text",
+						Text: systemMessage[:45],
+					},
+					{
+						Type: "text",
+						Text: systemMessage[45:],
+						CacheControl: &CacheControl{
+							Type: "ephemeral",
+						},
+					},
+				}
+			}
+		} else {
+			// 消息长度小于1000，直接使用单个系统消息
+			claudeRequest.System = []SystemContent{
+				{
+					Type: "text",
+					Text: systemMessage,
+				},
+			}
+		}
 	}
 
+	// 处理工具相关逻辑
 	for _, tool := range request.Tools {
 		tool := Tools{
 			Name:        tool.Function.Name,

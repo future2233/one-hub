@@ -99,17 +99,28 @@ type Message struct {
 	Content any    `json:"content"`
 }
 
+type SystemContent struct {
+	Type         string        `json:"type"`
+	Text         string        `json:"text"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
+}
+
+type CacheControl struct {
+	Type string `json:"type"`
+}
+
 type ClaudeRequest struct {
-	Model         string      `json:"model,omitempty"`
-	System        any         `json:"system,omitempty"`
-	Messages      []Message   `json:"messages"`
-	MaxTokens     int         `json:"max_tokens"`
-	StopSequences []string    `json:"stop_sequences,omitempty"`
-	Temperature   *float64    `json:"temperature,omitempty"`
-	TopP          *float64    `json:"top_p,omitempty"`
-	TopK          *int        `json:"top_k,omitempty"`
-	Tools         []Tools     `json:"tools,omitempty"`
-	ToolChoice    *ToolChoice `json:"tool_choice,omitempty"`
+	Model string `json:"model,omitempty"`
+	//System         string          `json:"system,omitempty"`
+	System        []SystemContent `json:"system,omitempty"`
+	Messages      []Message       `json:"messages"`
+	MaxTokens     int             `json:"max_tokens"`
+	StopSequences []string        `json:"stop_sequences,omitempty"`
+	Temperature   *float64        `json:"temperature,omitempty"`
+	TopP          *float64        `json:"top_p,omitempty"`
+	TopK          *int            `json:"top_k,omitempty"`
+	Tools         []Tools         `json:"tools,omitempty"`
+	ToolChoice    *ToolChoice     `json:"tool_choice,omitempty"`
 	//ClaudeMetadata    `json:"metadata,omitempty"`
 	Stream bool `json:"stream,omitempty"`
 }
