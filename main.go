@@ -53,12 +53,7 @@ func main() {
 
 	// Initialize SQL Database
 	model.SetupDB()
-	defer func() {
-		err := model.CloseDB()
-		if err != nil {
-
-		}
-	}()
+	defer model.CloseDB()
 	// Initialize Redis
 	redis.InitRedisClient()
 	cache.InitCacheManager()

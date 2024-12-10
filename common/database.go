@@ -1,4 +1,4 @@
 package common
 
-var UsingSQLite = true
+var UsingSQLite = false
 var UsingPostgreSQL = false
