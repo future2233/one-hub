@@ -2,23 +2,23 @@ version: "3.4"
 
 services:
   one-hub:
-    image: martialbe/one-api:latest
+    build:
+      context: .  # 使用当前目录作为构建上下文
+      dockerfile: Dockerfile  # 使用项目中的 Dockerfile
     container_name: one-hub
     restart: always
     ports:
       - "3000:3000"
     volumes:
       - ./data:/data
+      # 如果需要热更新，可以添加源代码目录映射
+      - .:/app
     environment:
-      - SQL_DSN=oneapi:123456@tcp(db:3306)/one-api # 修改此行，或注释掉以使用 SQLite 作为数据库
-      - REDIS_CONN_STRING=redis://redis # redis
-      - SESSION_SECRET=random_string # 修改为随机字符串
-      - USER_TOKEN_SECRET=random_string # 修改为随机字符串,32位以上
+      - SQL_DSN=oneapi:123456@tcp(db:3306)/one-api
+      - REDIS_CONN_STRING=redis://redis
+      - SESSION_SECRET=random_string
+      - USER_TOKEN_SECRET=random_string
       - TZ=Asia/Shanghai
-      # - HASHIDS_SALT=random_string # 可空，建议设置，字符串元素不能重复
-    #      - NODE_TYPE=slave  # 多机部署时从节点取消注释该行
-    #      - SYNC_FREQUENCY=60  # 需要定期从数据库加载数据时取消注释该行
-    #      - FRONTEND_BASE_URL=https://openai.justsong.cn  # 多机部署时从节点取消注释该行
     depends_on:
       - redis
       - db
