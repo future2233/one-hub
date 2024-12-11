@@ -122,7 +122,8 @@ type ClaudeRequest struct {
 	Tools         []Tools         `json:"tools,omitempty"`
 	ToolChoice    *ToolChoice     `json:"tool_choice,omitempty"`
 	//ClaudeMetadata    `json:"metadata,omitempty"`
-	Stream bool `json:"stream,omitempty"`
+	Stream      bool `json:"stream,omitempty"`
+	InputTokens int  `json:"-"` // 添加此字段，但不序列化到JSON
 }
 
 type ToolChoice struct {

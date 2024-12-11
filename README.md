@@ -13,7 +13,7 @@
 
 # One Hub
 
-_本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开发而来的_
+_本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开发的[one-hub](https://github.com/MartialBE/one-hub)再次开发而来的_
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/MartialBE/one-api/main/LICENSE">
@@ -49,28 +49,8 @@ _本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开�
 
 ## 功能变化
 
-- 全新的 UI 界面
-- 新增用户仪表盘
-- 新增管理员分析数据统计界面
-- 重构了中转`供应商`模块
-- 支持使用`Azure Speech`模拟`TTS`功能
-- 渠道可配置单独的 http/socks5 代理
-- 支持动态返回用户模型列表
-- 支持自定义测速模型
-- 日志增加请求耗时
-- 支持和优化非 OpenAI 模型的函数调用（支持的模型可以在 lobe-chat 直接使用）
-- 支持完成倍率自定义
-- 支持完整的分页和排序
-- 支持`Telegram bot`
-- 支持模型按次收费
-- 支持模型通配符
-- 支持使用配置文件启动程序
-- 支持模型价格更新
-- 支持自动获取供应商模型
-- 支持仅聊天，开启后如果有传入`function call`参数会跳过该渠道
-- 支持支付
-- 支持配置用户组 RPM
-- 支持`Prometheus`监控
+- 重构了claude的chat.go文件，实现了提示缓存 （当前支持system prompt，大于2000字符时，会自动缓存，或者自行填入中文符号、、符号后的内容会进行缓存）
+- docker compose文件修改为本地代码构建，方便开发使用
 
 ## 文档
 
@@ -106,26 +86,8 @@ _本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开�
 | [Ollama](https://github.com/ollama/ollama)                            | ✅                       | ✅         | -      | -           | -                                                                |
 | [Suno](https://suno.com/)                                             | -                        | -          | -      | -           | [Suno-API](https://github.com/Suno-API/Suno-API)                 |
 
-## 感谢
-
-- 本程序使用了以下开源项目
-  - [one-api](https://github.com/songquanpeng/one-api)为本项目的基础
-  - [Berry Free React Admin Template](https://github.com/codedthemes/berry-free-react-admin-template)为本项目的前端界面
-  - [minimal-ui-kit](https://github.com/minimal-ui-kit/material-kit-react),使用了其中的部分样式
-  - [new api](https://github.com/Calcium-Ion/new-api)，Midjourney/Suno 模块的代码来源于此
-  - [go-zero](https://github.com/zeromicro/go-zero) - Token 限流器的实现
-
-感谢以上项目的作者和贡献者
 
 ## 交流群
 
 <img src="https://github.com/MartialBE/one-hub/assets/42402987/9b608d39-70ae-4b2e-be49-09afab6bd536" width="300">
 
-## 其他
-
-<a href="https://next.ossinsight.io/widgets/official/analyze-repo-stars-history?repo_id=689214770" target="_blank" style="display: block" align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/analyze-repo-stars-history/thumbnail.png?repo_id=689214770&image_size=auto&color_scheme=dark" width="721" height="auto">
-    <img alt="Star History of MartialBE/one-api" src="https://next.ossinsight.io/widgets/official/analyze-repo-stars-history/thumbnail.png?repo_id=689214770&image_size=auto&color_scheme=light" width="721" height="auto">
-  </picture>
-</a>

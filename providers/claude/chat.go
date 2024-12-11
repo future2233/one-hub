@@ -178,7 +178,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 					},
 				}
 			} else {
-				// 如果没有、、分隔符，取前15个字符作为主要系统消息
+				// 如果没有、、分隔符，取前45个字符作为主要系统消息
 				claudeRequest.System = []SystemContent{
 					{
 						Type: "text",
@@ -356,8 +356,14 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	}
 
 	completionTokens := response.Usage.OutputTokens
-
 	promptTokens := response.Usage.InputTokens
+	if response.Usage.CacheReadInputTokens > 0 {
+		promptTokens += (response.Usage.CacheReadInputTokens * 1) / 10
+	}
+
+	if response.Usage.CacheCreationInputTokens > 0 {
+		promptTokens += (response.Usage.CacheCreationInputTokens * 3) / 2
+	}
 
 	openaiResponse.Usage.PromptTokens = promptTokens
 	openaiResponse.Usage.CompletionTokens = completionTokens
@@ -410,8 +416,15 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	switch claudeResponse.Type {
 	case "message_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
+		//h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
+		promptTokens := claudeResponse.Message.Usage.InputTokens
+		if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
+			promptTokens += (claudeResponse.Message.Usage.CacheReadInputTokens * 1) / 10
+		}
+		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
+			promptTokens += (claudeResponse.Message.Usage.CacheCreationInputTokens * 3) / 2
+		}
 		h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
-
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens = claudeResponse.Usage.OutputTokens
