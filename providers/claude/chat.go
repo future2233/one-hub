@@ -424,7 +424,7 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
 			promptTokens += (claudeResponse.Message.Usage.CacheCreationInputTokens * 3) / 2
 		}
-		h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
+		h.Usage.PromptTokens = promptTokens
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens = claudeResponse.Usage.OutputTokens
