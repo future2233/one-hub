@@ -44,13 +44,13 @@ func (p *OpenAIProvider) CreateChatCompletion(request *types.ChatCompletionReque
 
 	if response.Usage == nil || response.Usage.CompletionTokens == 0 {
 		response.Usage = &types.Usage{
-			PromptTokens:     p.Usage.PromptTokens,
+			PromptTokens:     p.Usage.PromptTokens * 2,
 			CompletionTokens: 0,
 			TotalTokens:      0,
 		}
 		// 那么需要计算
 		response.Usage.CompletionTokens = common.CountTokenText(response.GetContent(), request.Model)
-		response.Usage.TotalTokens = response.Usage.PromptTokens + response.Usage.CompletionTokens
+		response.Usage.TotalTokens = response.Usage.PromptTokens*2 + response.Usage.CompletionTokens
 	}
 
 	*p.Usage = *response.Usage
@@ -140,7 +140,7 @@ func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan s
 			}
 		} else {
 			if h.Usage.TotalTokens == 0 {
-				h.Usage.TotalTokens = h.Usage.PromptTokens
+				h.Usage.TotalTokens = h.Usage.PromptTokens * 2
 			}
 			countTokenText := common.CountTokenText(openaiResponse.GetResponseText(), h.ModelName)
 			h.Usage.CompletionTokens += countTokenText
