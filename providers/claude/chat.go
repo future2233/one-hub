@@ -360,7 +360,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	completionTokens := response.Usage.OutputTokens
 	promptTokens := response.Usage.InputTokens
 	if response.Usage.CacheReadInputTokens > 0 {
-		promptTokens += response.Usage.CacheReadInputTokens
+		promptTokens += response.Usage.CacheReadInputTokens * 2 / 3
 	}
 
 	if response.Usage.CacheCreationInputTokens > 0 {
@@ -426,16 +426,16 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
 			promptTokens += (claudeResponse.Message.Usage.CacheCreationInputTokens * 3) / 2
 		}
-		h.Usage.PromptTokens = promptTokens * 2
+		h.Usage.PromptTokens = promptTokens * 3 / 2
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens = claudeResponse.Usage.OutputTokens
-		h.Usage.TotalTokens = h.Usage.PromptTokens*2 + h.Usage.CompletionTokens
+		h.Usage.TotalTokens = (h.Usage.PromptTokens * 3 / 2) + h.Usage.CompletionTokens
 
 	case "content_block_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens += common.CountTokenText(claudeResponse.Delta.Text, h.Request.Model)
-		h.Usage.TotalTokens = h.Usage.PromptTokens*2 + h.Usage.CompletionTokens
+		h.Usage.TotalTokens = (h.Usage.PromptTokens * 3 / 2) + h.Usage.CompletionTokens
 
 	case "content_block_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
