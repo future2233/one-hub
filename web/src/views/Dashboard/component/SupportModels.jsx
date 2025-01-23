@@ -5,27 +5,40 @@ import { Box, Card, Stack, alpha, Tooltip, IconButton, Typography } from '@mui/m
 import Label from 'ui-component/Label';
 import { useTranslation } from 'react-i18next';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
+import IconWrapper from 'ui-component/IconWrapper';
 
 const SupportModels = () => {
   const [modelList, setModelList] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
+  const ownedby = useSelector((state) => state.siteInfo?.ownedby);
 
   const fetchModels = async () => {
     try {
-      let res = await API.get(`/api/user/models`);
-      if (res === undefined) {
-        return;
-      }
-      // 对 res.data.data 里面的 owned_by 进行分组
-      let modelGroup = {};
-      res.data.data.forEach((model) => {
-        if (modelGroup[model.owned_by] === undefined) {
-          modelGroup[model.owned_by] = [];
+      const res = await API.get(`/api/available_model`);
+      const { data, success } = res.data;
+      if (!success) return;
+
+      const modelGroup = Object.entries(data).reduce((acc, [modelId, modelInfo]) => {
+        const { owned_by } = modelInfo;
+        if (!acc[owned_by]) {
+          acc[owned_by] = [];
         }
-        modelGroup[model.owned_by].push(model.id);
-      });
-      setModelList(modelGroup);
+        acc[owned_by].push(modelId);
+        return acc;
+      }, {});
+
+      Object.values(modelGroup).forEach((models) => models.sort());
+
+      const sortedModelGroup = Object.keys(modelGroup)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = modelGroup[key];
+          return acc;
+        }, {});
+
+      setModelList(sortedModelGroup);
     } catch (error) {
       showError(error.message);
     }
@@ -34,6 +47,11 @@ const SupportModels = () => {
   useEffect(() => {
     fetchModels();
   }, []);
+
+  const getIconByName = (name) => {
+    const owner = ownedby.find((item) => item.name === name);
+    return owner?.icon;
+  };
 
   return (
     <Card>
@@ -149,7 +167,10 @@ const SupportModels = () => {
                     fontWeight: 'bold'
                   }}
                 >
-                  {provider}
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconWrapper url={getIconByName(provider)} />
+                    <span>{provider}</span>
+                  </Stack>
                 </Typography>
                 <Box
                   sx={{

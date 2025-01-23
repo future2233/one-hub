@@ -18,12 +18,14 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter.POST("/telegram/:token", middleware.Telegram(), controller.TelegramBotWebHook)
 	apiRouter.Use(middleware.GlobalAPIRateLimit())
 	{
+		apiRouter.GET("/image/:id", controller.CheckImg)
 		apiRouter.GET("/status", controller.GetStatus)
 		apiRouter.GET("/notice", controller.GetNotice)
 		apiRouter.GET("/about", controller.GetAbout)
 		apiRouter.GET("/prices", middleware.PricesAuth(), middleware.CORS(), controller.GetPricesList)
 		apiRouter.GET("/ownedby", relay.GetModelOwnedBy)
-		apiRouter.GET("/user_group_map", controller.GetUserGroupRatio)
+		apiRouter.GET("/available_model", middleware.CORS(), middleware.TrySetUserBySession(), relay.AvailableModel)
+		apiRouter.GET("/user_group_map", middleware.TrySetUserBySession(), controller.GetUserGroupRatio)
 		apiRouter.GET("/home_page_content", controller.GetHomePageContent)
 		apiRouter.GET("/verification", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), controller.SendEmailVerification)
 		apiRouter.GET("/reset_password", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), controller.SendPasswordResetEmail)
@@ -56,7 +58,6 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.GET("/token", controller.GenerateAccessToken)
 				selfRoute.GET("/aff", controller.GetAffCode)
 				selfRoute.POST("/topup", controller.TopUp)
-				selfRoute.GET("/models", relay.ListModels)
 				selfRoute.GET("/payment", controller.GetUserPaymentList)
 				selfRoute.POST("/order", controller.CreateOrder)
 				selfRoute.GET("/order/status", controller.CheckOrderStatus)
@@ -69,6 +70,7 @@ func SetApiRouter(router *gin.Engine) {
 				adminRoute.GET("/:id", controller.GetUser)
 				adminRoute.POST("/", controller.CreateUser)
 				adminRoute.POST("/manage", controller.ManageUser)
+				adminRoute.POST("/quota/:id", controller.ChangeUserQuota)
 				adminRoute.PUT("/", controller.UpdateUser)
 				adminRoute.DELETE("/:id", controller.DeleteUser)
 			}
@@ -85,6 +87,17 @@ func SetApiRouter(router *gin.Engine) {
 			optionRoute.GET("/telegram/:id", controller.GetTelegramMenu)
 			optionRoute.DELETE("/telegram/:id", controller.DeleteTelegramMenu)
 		}
+
+		modelOwnedByRoute := apiRouter.Group("/model_ownedby")
+		modelOwnedByRoute.GET("/", controller.GetAllModelOwnedBy)
+		modelOwnedByRoute.Use(middleware.AdminAuth())
+		{
+			modelOwnedByRoute.GET("/:id", controller.GetModelOwnedBy)
+			modelOwnedByRoute.POST("/", controller.CreateModelOwnedBy)
+			modelOwnedByRoute.PUT("/", controller.UpdateModelOwnedBy)
+			modelOwnedByRoute.DELETE("/:id", controller.DeleteModelOwnedBy)
+		}
+
 		userGroup := apiRouter.Group("/user_group")
 		userGroup.Use(middleware.AdminAuth())
 		{
@@ -197,6 +210,12 @@ func SetApiRouter(router *gin.Engine) {
 		taskRoute := apiRouter.Group("/task")
 		taskRoute.GET("/self", middleware.UserAuth(), controller.GetUserAllTask)
 		taskRoute.GET("/", middleware.AdminAuth(), controller.GetAllTask)
+	}
+
+	sseRouter := router.Group("/api/sse")
+	sseRouter.Use(middleware.GlobalAPIRateLimit())
+	{
+		sseRouter.POST("/channel/check", middleware.AdminAuth(), controller.CheckChannel)
 	}
 
 }

@@ -6,6 +6,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
+	"one-api/common/redis"
 	"one-api/common/utils"
 	"strings"
 
@@ -164,6 +165,11 @@ func (user *User) Update(updatePassword bool) error {
 
 	if err == nil && user.Role == config.RoleRootUser {
 		config.RootUserEmail = user.Email
+	}
+
+	// 删除缓存
+	if config.RedisEnabled {
+		redis.RedisDel(fmt.Sprintf(UserGroupCacheKey, user.Id))
 	}
 
 	return err
@@ -520,4 +526,26 @@ func GetUserStatisticsByPeriod(startTimestamp, endTimestamp int64) (statistics [
 	`, startTimestamp, endTimestamp).Scan(&statistics).Error
 
 	return statistics, err
+}
+
+func ChangeUserQuota(id int, quota int, isRecharge bool) (err error) {
+	updateMap := map[string]interface{}{
+		"quota": gorm.Expr("quota + ?", quota),
+	}
+
+	if isRecharge {
+		updateMap["recharge_count"] = gorm.Expr("recharge_count + 1")
+	}
+
+	err = DB.Model(&User{}).Where("id = ?", id).Updates(updateMap).Error
+
+	if err != nil {
+		return err
+	}
+
+	if config.RedisEnabled {
+		redis.RedisDel(fmt.Sprintf(UserQuotaCacheKey, id))
+	}
+
+	return nil
 }

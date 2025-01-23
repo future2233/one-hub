@@ -386,6 +386,10 @@ func shouldRetryBadRequest(channelType int, apiErr *types.OpenAIErrorWithStatusC
 	case config.ChannelTypeBedrock:
 		return strings.Contains(apiErr.OpenAIError.Message, "Operation not allowed")
 	default:
+		// gemini
+		if apiErr.OpenAIError.Param == "INVALID_ARGUMENT" && strings.Contains(apiErr.OpenAIError.Message, "API key not valid") {
+			return true
+		}
 		return false
 	}
 }
@@ -403,26 +407,34 @@ var (
 )
 
 func relayResponseWithErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) {
-	statusCode := err.StatusCode
+	newErr := types.OpenAIErrorWithStatusCode{}
+	if err != nil {
+		newErr = *err
+	}
+
+	if newErr.StatusCode == http.StatusTooManyRequests {
+		newErr.OpenAIError.Message = "当前分组上游负载已饱和，请稍后再试"
+	}
+	statusCode := newErr.StatusCode
 	// 如果message中已经包含 request id: 则不再添加
-	if strings.Contains(err.Message, "(request id:") {
-		err.Message = requestIdRegex.ReplaceAllString(err.Message, "")
+	if strings.Contains(newErr.Message, "(request id:") {
+		newErr.Message = requestIdRegex.ReplaceAllString(newErr.Message, "")
 	}
 
 	requestId := c.GetString(logger.RequestIdKey)
-	err.OpenAIError.Message = utils.MessageWithRequestId(err.OpenAIError.Message, requestId)
+	newErr.OpenAIError.Message = utils.MessageWithRequestId(newErr.OpenAIError.Message, requestId)
 
-	switch err.OpenAIError.Type {
+	switch newErr.OpenAIError.Type {
 	case "new_api_error", "one_api_error", "shell_api_error":
-		err.OpenAIError.Type = "system_error"
-		if utils.ContainsString(err.Message, quotaKeywords) {
-			err.Message = "上游负载已饱和，请稍后再试"
+		newErr.OpenAIError.Type = "system_error"
+		if utils.ContainsString(newErr.Message, quotaKeywords) {
+			newErr.Message = "上游负载已饱和，请稍后再试"
 			statusCode = http.StatusTooManyRequests
 		}
 	}
 
 	c.JSON(statusCode, gin.H{
-		"error": err.OpenAIError,
+		"error": newErr.OpenAIError,
 	})
 }
 

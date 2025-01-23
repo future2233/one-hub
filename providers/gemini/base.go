@@ -1,13 +1,15 @@
 package gemini
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"one-api/common/logger"
 	"one-api/common/requester"
 	"one-api/model"
 	"one-api/providers/base"
+	"one-api/providers/openai"
 	"one-api/types"
 	"strings"
 )
@@ -16,45 +18,87 @@ type GeminiProviderFactory struct{}
 
 // 创建 GeminiProvider
 func (f GeminiProviderFactory) Create(channel *model.Channel) base.ProviderInterface {
+	useOpenaiAPI := false
+	useCodeExecution := false
+
+	if channel.Plugin != nil {
+		plugin := channel.Plugin.Data()
+		if pWeb, ok := plugin["code_execution"]; ok {
+			if enable, ok := pWeb["enable"].(bool); ok && enable {
+				useCodeExecution = true
+			}
+		}
+
+		if pWeb, ok := plugin["use_openai_api"]; ok {
+			if enable, ok := pWeb["enable"].(bool); ok && enable {
+				useOpenaiAPI = true
+			}
+		}
+	}
+
+	version := "v1beta"
+	if channel.Other != "" {
+		version = channel.Other
+	}
+
 	return &GeminiProvider{
-		BaseProvider: base.BaseProvider{
-			Config:    getConfig(),
-			Channel:   channel,
-			Requester: requester.NewHTTPRequester(*channel.Proxy, RequestErrorHandle),
+		OpenAIProvider: openai.OpenAIProvider{
+			BaseProvider: base.BaseProvider{
+				Config:    getConfig(version),
+				Channel:   channel,
+				Requester: requester.NewHTTPRequester(*channel.Proxy, RequestErrorHandle(channel.Key)),
+			},
+			SupportStreamOptions: true,
 		},
+		UseOpenaiAPI:     useOpenaiAPI,
+		UseCodeExecution: useCodeExecution,
 	}
 }
 
 type GeminiProvider struct {
-	base.BaseProvider
+	openai.OpenAIProvider
+	UseOpenaiAPI     bool
+	UseCodeExecution bool
 }
 
-func getConfig() base.ProviderConfig {
+func getConfig(version string) base.ProviderConfig {
 	return base.ProviderConfig{
 		BaseURL:         "https://generativelanguage.googleapis.com",
-		ChatCompletions: "/",
+		ChatCompletions: fmt.Sprintf("/%s/chat/completions", version),
 		ModelList:       "/models",
 	}
 }
 
 // 请求错误处理
-func RequestErrorHandle(resp *http.Response) *types.OpenAIError {
-	geminiError := &GeminiErrorResponse{}
-	err := json.NewDecoder(resp.Body).Decode(geminiError)
-	if err != nil {
+func RequestErrorHandle(key string) requester.HttpErrorHandler {
+	return func(resp *http.Response) *types.OpenAIError {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil
+		}
+		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		geminiError := &GeminiErrorResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(geminiError); err == nil {
+			return errorHandle(geminiError, key)
+		} else {
+			geminiErrors := &GeminiErrors{}
+			if err := json.Unmarshal(bodyBytes, geminiErrors); err == nil {
+				return errorHandle(geminiErrors.Error(), key)
+			}
+		}
+
 		return nil
 	}
-
-	return errorHandle(geminiError)
 }
 
 // 错误处理
-func errorHandle(geminiError *GeminiErrorResponse) *types.OpenAIError {
+func errorHandle(geminiError *GeminiErrorResponse, key string) *types.OpenAIError {
 	if geminiError.ErrorInfo == nil || geminiError.ErrorInfo.Message == "" {
 		return nil
 	}
 
-	cleaningError(geminiError.ErrorInfo)
+	cleaningError(geminiError.ErrorInfo, key)
 
 	return &types.OpenAIError{
 		Message: geminiError.ErrorInfo.Message,
@@ -64,11 +108,12 @@ func errorHandle(geminiError *GeminiErrorResponse) *types.OpenAIError {
 	}
 }
 
-func cleaningError(errorInfo *GeminiError) {
-	if strings.Contains(errorInfo.Message, "Publisher Model") || strings.Contains(errorInfo.Message, "api_key") {
-		logger.SysError(fmt.Sprintf("Gemini Error: %s", errorInfo.Message))
-		errorInfo.Message = "上游错误，请联系管理员."
+func cleaningError(errorInfo *GeminiError, key string) {
+	if key == "" {
+		return
 	}
+	message := strings.Replace(errorInfo.Message, key, "xxxxx", 1)
+	errorInfo.Message = message
 }
 
 func (p *GeminiProvider) GetFullRequestURL(requestURL string, modelName string) string {

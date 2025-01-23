@@ -164,7 +164,8 @@
     "testModels": "測速模型",
     "updateChannelBalance": "已更新完畢所有已啟用通道餘額！",
     "updateOk": "更新成功！",
-    "weightTip": "權重不能小於 1"
+    "weightTip": "權重不能小於 1",
+    "check": "檢測"
   },
   "common": {
     "again": "重試 ({{count}})",
@@ -269,7 +270,19 @@
     "totalInputTokens": "計算輸入Tokens",
     "totalOutputTokens": "計算輸出Tokens",
     "typeLabel": "類型",
-    "userLabel": "用戶"
+    "userLabel": "用戶",
+    "content": {
+      "calculate_steps": "計算步驟:",
+      "calculate_steps_tip": "PS：本系統按照積分計算，所有金額均為積分換算而來，1積分=$0.000002，最低消費為1積分，本計算步驟僅供參考，以實際扣費為準。",
+      "channel_group": "分組: {{ channel_group }}",
+      "group_discount": "分組折扣: {{ discount }}",
+      "input_price": "輸入: ${{ price }} /M",
+      "original_input_price": "原輸入價格: ${{ price }} /M",
+      "original_output_price": "原輸出價格: ${{ price }} /M",
+      "original_times_price": "原價格: ${{ times }} / 次",
+      "output_price": "輸出: ${{ price }} /M",
+      "times_price": "${{ times }} / 次"
+    }
   },
   "login": {
     "codeRequired": "驗證碼不能為空",
@@ -327,10 +340,18 @@
   "modelpricePage": {
     "availableModels": "可用模型",
     "channelType": "供應商",
-    "inputMultiplier": "輸入倍率",
+    "group": "分組",
+    "inputMultiplier": "輸入價格",
     "model": "模型名稱",
-    "outputMultiplier": "輸出倍率",
-    "type": "類型"
+    "noneGroup": "當前分組不可用",
+    "outputMultiplier": "輸出價格",
+    "search": "搜尋",
+    "times": "按次付費",
+    "tokens": "按量付費",
+    "type": "類型",
+    "inputAudioTokensRatio": "音頻輸入倍率",
+    "other": "其他",
+    "outputAudioTokensRatio": "音頻輸出倍率"
   },
   "nova 映射": "nova 映射",
   "onyx 映射": "onyx 映射",
@@ -664,7 +685,12 @@
         "save": "保存倍率設置",
         "title": "倍率設置"
       },
-      "title": "運營設置"
+      "title": "運營設置",
+      "audioTokenSettings": {
+        "info": "配置音頻倍率。配置格式為JSON，鍵為模型名稱，值為輸入輸出令牌倍率。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
+        "save": "保留音頻權杖設置",
+        "title": "音頻令牌設置"
+      }
     },
     "otherSettings": {
       "customSettings": {
@@ -955,7 +981,9 @@
     "ratio": "倍率",
     "symbol": "標識",
     "symbolTip": "標識用於區分用戶組，請使用英文，不可重複",
-    "title": "用戶分組"
+    "title": "用戶分組",
+    "apiRate": "API速率",
+    "apiRateTip": "每分鐘允許的請求數，當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效。"
   },
   "userPage": {
     "action": "操作",
@@ -991,7 +1019,12 @@
     "userRole": "用戶角色",
     "username": "用戶名",
     "usernameRequired": "用戶名不能為空",
-    "users": "用戶"
+    "users": "用戶",
+    "changeQuota": "增減額度",
+    "changeQuotaHelperText": "呢度係增減，唔係直接更改用戶餘額，輸入美元，你最多可以扣除 {{quota}}",
+    "changeQuotaNotEmpty": "請填寫更改額度",
+    "changeQuotaNotEnough": "唔可以扣除超過用戶餘額嘅金額",
+    "quotaRemark": "備註"
   },
   "user_group": "用戶分組",
   "validation": {
@@ -1081,5 +1114,17 @@
   "默认 zh-CN-YunxiNeural": "默認 zh-HK-YunxiNeural",
   "默认 zh-CN-YunxiNeural|boy": "默認 zh-HK-YunxiNeural|boy",
   "默认 zh-CN-YunyangNeural": "默認 zh-HK-YunyangNeural",
-  "默认 zh-CN-YunyeNeural": "默認 zh-HK-YunyeNeural"
+  "默认 zh-CN-YunyeNeural": "默認 zh-HK-YunyeNeural",
+  "playground": "聊天",
+  "modelOwnedby": {
+    "action": "操作",
+    "create": "新建模型歸屬",
+    "icon": "圖標",
+    "iconTip": "圖標用於在模型清單中顯示",
+    "id": "身分證",
+    "idTip": "渠道ID，數字，請設定大於1000以上的數字，設定好不可更改。",
+    "name": "名稱",
+    "nameTip": "渠道名稱",
+    "title": "模型歸屬"
+  }
 }

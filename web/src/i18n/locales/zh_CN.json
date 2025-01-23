@@ -219,7 +219,19 @@
     "outputAudioTokens": "输出音频Tokens",
     "cachedTokens": "缓存Tokens",
     "totalInputTokens": "计算输入Tokens",
-    "totalOutputTokens": "计算输出Tokens"
+    "totalOutputTokens": "计算输出Tokens",
+    "content": {
+      "channel_group": "分组: {{ channel_group }}",
+      "group_discount": "分组折扣: {{ discount }}",
+      "input_price": "输入: ${{ price }} /M",
+      "output_price": "输出: ${{ price }} /M",
+      "times_price": "${{ times }} / 次",
+      "original_input_price": "原输入价格: ${{ price }} /M",
+      "original_output_price": "原输出价格: ${{ price }} /M",
+      "original_times_price": "原价格: ${{ times }} / 次",
+      "calculate_steps": "计算步骤: ",
+      "calculate_steps_tip": "PS：本系统按照积分计算，所有金额均为积分换算而来，1积分=$0.000002，最低消费为1积分，本计算步骤仅供参考，以实际扣费为准"
+    }
   },
   "redemptionPage": {
     "pageTitle": "兑换",
@@ -343,7 +355,12 @@
     "cUserRole": "普通用户",
     "adminUserRole": "管理员",
     "superAdminRole": "超级管理员",
-    "uUserRole": "未知身份"
+    "uUserRole": "未知身份",
+    "changeQuota": "增减额度",
+    "changeQuotaHelperText": "这里是增减，不是直接更改用户余额，输入美元，你最多可以减扣 {{quota}}",
+    "changeQuotaNotEmpty": "请填写变更额度",
+    "changeQuotaNotEnough": "不能扣除超过用户余额的额度",
+    "quotaRemark": "备注"
   },
   "profilePage": {
     "personalInfo": "个人信息",
@@ -399,9 +416,17 @@
     "model": "模型名称",
     "type": "类型",
     "channelType": "供应商",
-    "inputMultiplier": "输入倍率",
-    "outputMultiplier": "输出倍率",
-    "availableModels": "可用模型"
+    "availableModels": "可用模型",
+    "group": "分组",
+    "inputMultiplier": "输入价格",
+    "outputMultiplier": "输出价格",
+    "search": "搜索",
+    "tokens": "按量付费",
+    "times": "按次付费",
+    "noneGroup": "当前分组不可用",
+    "other": "其他",
+    "inputAudioTokensRatio": "音频输入倍率",
+    "outputAudioTokensRatio": "音频输出倍率"
   },
   "paymentPage": {
     "orderList": "订单列表",
@@ -580,6 +605,11 @@
         "title": "聊天链接设置",
         "info": "配置聊天链接，该配置在令牌中的聊天生效以及首页的Playground中的聊天生效. <br />链接中可以使&#123;key&#125;替换用户的令牌，&#123;server&#125;替换服务器地址。例如：{'https://chat.oneapi.pro/#/?settings={\"key\":\"sk-{key}\",\"url\":\"{server}\"}'}<br />如果未配置，会默认配置以下4个链接：<br />ChatGPT Next ： {'https://chat.oneapi.pro/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />chatgpt-web-midjourney-proxy ： {'https://vercel.ddaiai.com/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />AMA 问天 ： {'ama://set-api-key?server={server}&key={key}'}<br />opencat ： {'opencat://team/join?domain={server}&token={key}'}<br />排序规则：值越大越靠前，值相同则按照配置顺序",
         "save": "保存聊天链接设置"
+      },
+      "audioTokenSettings": {
+        "title": "音频令牌设置",
+        "info": "配置音频倍率. 配置格式为JSON，键为模型名称，值为输入输出令牌倍率。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
+        "save": "保存音频令牌设置"
       }
     },
     "systemSettings": {
@@ -862,6 +892,7 @@
     "otherArg": "其他参数",
     "delChannel": "删除渠道",
     "delChannelInfo": "是否删除渠道",
+    "check": "检测",
     "manual": "手动",
     "auto": "自动",
     "testAllChannel": "已成功开始测试所有通道，请刷新页面查看结果。",
@@ -1084,5 +1115,16 @@
     "nameTip": "给用户看的名称",
     "apiRate": "API速率",
     "apiRateTip": "每分钟允许的请求数,当速率小于60时，使用计数器限制器，当速率大于等于60时，使用令牌桶限制器，仅在启用Redis时有效"
+  },
+  "modelOwnedby": {
+    "title": "模型归属",
+    "create": "新建模型归属",
+    "id": "ID",
+    "name": "名称",
+    "icon": "图标",
+    "iconTip": "图标用于在模型列表中显示",
+    "action": "操作",
+    "idTip": "渠道ID,数字，请设置 大于1000以上的数字，设置好不可更改",
+    "nameTip": "渠道名称"
   }
 }
