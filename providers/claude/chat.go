@@ -162,9 +162,9 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 
 	// 处理系统消息
 	if systemMessage != "" {
-		if len(systemMessage) > 2500 {
+		if len(systemMessage) > 2500 && !strings.Contains(systemMessage, "no prompt cache") {
 			parts := strings.Split(systemMessage, "、、")
-			if len(parts) > 1 {
+			if len(parts) == 2 {
 				// 使用、、分隔的第一部分作为主要系统消息
 				claudeRequest.System = []SystemContent{
 					{
@@ -177,6 +177,25 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 						CacheControl: &CacheControl{
 							Type: "ephemeral",
 						},
+					},
+				}
+			} else if len(parts) == 3 {
+				// 使用、、分隔的第一部分作为主要系统消息
+				claudeRequest.System = []SystemContent{
+					{
+						Type: "text",
+						Text: parts[0],
+					},
+					{
+						Type: "text",
+						Text: strings.Join(parts[1:2], ""),
+						CacheControl: &CacheControl{
+							Type: "ephemeral",
+						},
+					},
+					{
+						Type: "text",
+						Text: strings.Join(parts[2:], ""),
 					},
 				}
 			} else {
@@ -196,7 +215,8 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 				}
 			}
 		} else {
-			// 消息长度小于1000，直接使用单个系统消息
+			// 直接使用单个系统消息
+			systemMessage = strings.ReplaceAll(systemMessage, "no prompt cache", "")
 			claudeRequest.System = []SystemContent{
 				{
 					Type: "text",
