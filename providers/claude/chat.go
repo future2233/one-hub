@@ -380,7 +380,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	completionTokens := response.Usage.OutputTokens
 	promptTokens := response.Usage.InputTokens
 	if response.Usage.CacheReadInputTokens > 0 {
-		promptTokens += response.Usage.CacheReadInputTokens * 2 / 3
+		promptTokens += response.Usage.CacheReadInputTokens
 	}
 
 	if response.Usage.CacheCreationInputTokens > 0 {
@@ -441,7 +441,7 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 		//h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
 		promptTokens := claudeResponse.Message.Usage.InputTokens
 		if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
-			promptTokens += (claudeResponse.Message.Usage.CacheReadInputTokens * 2) / 3
+			promptTokens += claudeResponse.Message.Usage.CacheReadInputTokens
 		}
 		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
 			promptTokens += (claudeResponse.Message.Usage.CacheCreationInputTokens * 3) / 2

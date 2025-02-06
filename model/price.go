@@ -18,7 +18,7 @@ const (
 	DefaultAudioRatio  = 40
 
 	DefaultCachedWriteRatio = 1.25
-	DefaultCachedReadRatio  = 0.1
+	DefaultCachedReadRatio  = 0.5
 )
 
 type Price struct {
