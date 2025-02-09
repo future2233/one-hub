@@ -196,6 +196,9 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 					{
 						Type: "text",
 						Text: strings.Join(parts[2:], ""),
+            CacheControl: &CacheControl{
+						  Type: "ephemeral",
+						},
 					},
 				}
 			} else {
