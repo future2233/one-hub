@@ -196,8 +196,8 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 					{
 						Type: "text",
 						Text: strings.Join(parts[2:], ""),
-            CacheControl: &CacheControl{
-						  Type: "ephemeral",
+						CacheControl: &CacheControl{
+							Type: "ephemeral",
 						},
 					},
 				}
@@ -444,11 +444,11 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 		//h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
 		promptTokens := claudeResponse.Message.Usage.InputTokens
 		//if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
-		//	promptTokens += claudeResponse.Message.Usage.CacheReadInputTokens
+		//	promptTokens += claudeResponse.Message.Usage.CacheReadInputTokens * 1 / 10
 		//}
-		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
-			promptTokens += claudeResponse.Message.Usage.CacheCreationInputTokens
-		}
+		//if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
+		//	promptTokens += claudeResponse.Message.Usage.CacheCreationInputTokens * 5 / 4
+		//}
 		h.Usage.PromptTokens = promptTokens * 5 / 4
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
