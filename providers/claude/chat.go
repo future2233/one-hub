@@ -440,22 +440,22 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		//h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
 		promptTokens := claudeResponse.Message.Usage.InputTokens
-		if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
-			promptTokens += claudeResponse.Message.Usage.CacheReadInputTokens
-		}
+		//if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
+		//	promptTokens += claudeResponse.Message.Usage.CacheReadInputTokens
+		//}
 		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
-			promptTokens += (claudeResponse.Message.Usage.CacheCreationInputTokens * 3) / 2
+			promptTokens += claudeResponse.Message.Usage.CacheCreationInputTokens
 		}
-		h.Usage.PromptTokens = promptTokens * 3 / 2
+		h.Usage.PromptTokens = promptTokens * 5 / 4
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens = claudeResponse.Usage.OutputTokens
-		h.Usage.TotalTokens = (h.Usage.PromptTokens * 3 / 2) + h.Usage.CompletionTokens
+		h.Usage.TotalTokens = (h.Usage.PromptTokens * 5 / 4) + h.Usage.CompletionTokens
 
 	case "content_block_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.CompletionTokens += common.CountTokenText(claudeResponse.Delta.Text, h.Request.Model)
-		h.Usage.TotalTokens = (h.Usage.PromptTokens * 3 / 2) + h.Usage.CompletionTokens
+		h.Usage.TotalTokens = (h.Usage.PromptTokens * 5 / 4) + h.Usage.CompletionTokens
 
 	case "content_block_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
