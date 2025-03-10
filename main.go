@@ -12,6 +12,7 @@ import (
 	"one-api/common/oidc"
 	"one-api/common/redis"
 	"one-api/common/requester"
+	"one-api/common/search"
 	"one-api/common/storage"
 	"one-api/common/telegram"
 	"one-api/controller"
@@ -76,6 +77,7 @@ func main() {
 	notify.InitNotifier()
 	cron.InitCron()
 	storage.InitStorage()
+	search.InitSearcher()
 
 	initHttpServer()
 }
@@ -93,7 +95,7 @@ func initMemoryCache() {
 	model.TokenCacheSeconds = syncFrequency
 
 	logger.SysLog("memory cache enabled")
-	logger.SysError(fmt.Sprintf("sync frequency: %d seconds", syncFrequency))
+	logger.SysLog(fmt.Sprintf("sync frequency: %d seconds", syncFrequency))
 	go model.SyncOptions(syncFrequency)
 	go SyncChannelCache(syncFrequency)
 }

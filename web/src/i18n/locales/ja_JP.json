@@ -281,7 +281,10 @@
       "original_output_price": "元の出力価格：${{ price }}/M",
       "original_times_price": "元の価格：${{ times }} / 回",
       "output_price": "出力: ${{ price }} /M",
-      "times_price": "${{ times }} / 回"
+      "times_price": "${{ times }} / 回",
+      "free": "無料",
+      "old_log": "旧バージョンのログ",
+      "illustrate": "* この記録はシステムアップグレード前のログであり"
     },
     "cachedReadTokens": "キャッシュからトークンを読み取ります（* {{ ratio }} )",
     "cachedWriteTokens": "トークンのキャッシュ書き込み（* {{ ratio }} ）"
@@ -353,7 +356,8 @@
     "type": "タイプ",
     "inputAudioTokensRatio": "オーディオ入力倍率",
     "other": "その他",
-    "outputAudioTokensRatio": "オーディオ出力倍率"
+    "outputAudioTokensRatio": "オーディオ出力倍率",
+    "rate": "倍率"
   },
   "nova 映射": "新星マッピング",
   "onyx 映射": "オニキスマッピング",
@@ -640,7 +644,9 @@
         },
         "mjNotify": "Midjourneyはコールバックを許可します（サーバーのIPアドレスが漏洩する可能性があります）",
         "saveButton": "その他の設定を保存",
-        "title": "その他の設定"
+        "title": "その他の設定",
+        "claudeAPIEnabled": "Claude APIを有効にしますか？",
+        "geminiAPIEnabled": "Gemini APIを有効にしますか？"
       },
       "paymentSettings": {
         "alert": "支払い設定： <br />1. USD為替レート：リチャージ金額のUSD金額を計算するために使用されます <br />2. 最低リチャージ金額（USD）：最低リチャージ金額、単位はUSD、整数を入力してください <br />3. ページはすべてUSD単位で計算され、ユーザーが支払う実際の通貨は支払いゲートウェイに設定された通貨に応じて変換されます <br />例：Aゲートウェイが通貨をCNYに設定すると、ユーザーは100USDを支払い、実際の支払金額は100 * USD為替レートになります <br />Bゲートウェイが通貨をUSDに設定すると、ユーザーは100USDを支払い、実際の支払金額は100USDになります",
@@ -693,6 +699,11 @@
         "info": "オーディオ倍率を設定します。JSON形式で、キーはモデル名であり、値は入力および出力のオーディオトークンの倍率です。例：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
         "save": "オーディオトークン設定を保存します",
         "title": "オーディオトークンの設定"
+      },
+      "disableChannelKeywordsSettings": {
+        "info": "キーワードを1行ずつ入力して、禁止ワードリストを設定してください。",
+        "save": "無効なチャネルキーワード設定を保存します",
+        "title": "チャネルキーワード設定を無効にする"
       }
     },
     "otherSettings": {
@@ -1080,7 +1091,6 @@
   "模型名称为coze-{bot_id}，你也可以直接使用 coze-* 通配符来匹配所有coze开头的模型": "モデル名は coze-{bot_id} です。coze-* ワイルドカードを直接使用して、coze で始まるすべてのモデルと一致させることもできます。",
   "模型名称映射， 你可以取一个容易记忆的名字来代替coze-{bot_id}，例如：{\"coze-translate\": \"coze-xxxxx\"},注意：如果使用了模型映射，那么上面的模型名称必须使用映射前的名称，上述例子中，你应该在模型中填入coze-translate(如果已经使用了coze-*，可以忽略)。": "モデル名のマッピングでは、coze-{bot_id} を覚えやすい名前に置き換えることができます (例: {\"coze-translate\": \"coze-xxxxx\"})。 注: モデル マッピングが使用されている場合は、上記のモデル名が使用されます。上記の例では、モデルに coze-translate を入力する必要があります (coze-* がすでに使用されている場合は無視できます)。",
   "模型映射关系": "モデルマッピング関係",
-  "模型映射关系：例如用户请求A模型，实际转发给渠道的模型为B。": "モデルマッピング関係：例えば、ユーザーがモデルAを要求した場合、実際にはチャネルに転送されるモデルはBです。",
   "测速模型": "スピードモデル",
   "渠道API地址": "チャネルAPIアドレス",
   "渠道名称": "チャンネル名",
@@ -1130,5 +1140,8 @@
     "nameTip": "チャネル名",
     "title": "モデルの帰属"
   },
-  "price": "価格"
+  "price": "価格",
+  "模型映射关系：例如用户请求A模型，实际转发给渠道的模型为B。在B模型加前缀+，表示使用传入模型计费，例如：+gpt-3": {
+    "5-turbo": "モデルマッピング関係：例えば、ユーザーがAモデルをリクエストした場合、実際にチャンネルに転送されるのはBモデルです。 Bモデルにプレフィックス+を付けて、入力されたモデルを使用して課金することを示します。 例：+gpt-3.5-turbo"
+  }
 }

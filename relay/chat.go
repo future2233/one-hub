@@ -11,6 +11,7 @@ import (
 	"one-api/common/utils"
 	providersBase "one-api/providers/base"
 	"one-api/types"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,7 +44,14 @@ func (r *relayChat) setRequest() error {
 		return errors.New("the 'stream_options' parameter is only allowed when 'stream' is enabled")
 	}
 
-	r.originalModel = r.chatRequest.Model
+	r.setOriginalModel(r.chatRequest.Model)
+
+	otherArg := r.getOtherArg()
+
+	if otherArg == "search" {
+		handleSearch(r.c, &r.chatRequest)
+		return nil
+	}
 
 	return nil
 }
@@ -82,7 +90,9 @@ func (r *relayChat) send() (err *types.OpenAIErrorWithStatusCode, done bool) {
 			return r.getUsageResponse()
 		}
 
-		err = responseStreamClient(r.c, response, doneStr)
+		var firstResponseTime time.Time
+		firstResponseTime, err = responseStreamClient(r.c, response, doneStr)
+		r.SetFirstResponseTime(firstResponseTime)
 	} else {
 		var response *types.ChatCompletionResponse
 		response, err = chatProvider.CreateChatCompletion(&r.chatRequest)

@@ -43,14 +43,15 @@ type ChatCompletionToolCalls struct {
 }
 
 type ChatCompletionMessage struct {
-	Role         string                           `json:"role"`
-	Content      any                              `json:"content,omitempty"`
-	Refusal      string                           `json:"refusal,omitempty"`
-	Name         *string                          `json:"name,omitempty"`
-	FunctionCall *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
-	ToolCalls    []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
-	ToolCallID   string                           `json:"tool_call_id,omitempty"`
-	Audio        any                              `json:"audio,omitempty"`
+	Role             string                           `json:"role"`
+	Content          any                              `json:"content,omitempty"`
+	Refusal          string                           `json:"refusal,omitempty"`
+	ReasoningContent string                           `json:"reasoning_content,omitempty"`
+	Name             *string                          `json:"name,omitempty"`
+	FunctionCall     *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
+	ToolCalls        []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
+	ToolCallID       string                           `json:"tool_call_id,omitempty"`
+	Audio            any                              `json:"audio,omitempty"`
 }
 
 func (m ChatCompletionMessage) StringContent() string {
@@ -214,6 +215,8 @@ type ChatCompletionRequest struct {
 	Audio               *ChatAudio                    `json:"audio,omitempty"`
 	ReasoningEffort     *string                       `json:"reasoning_effort,omitempty"`
 	Prediction          any                           `json:"prediction,omitempty"`
+
+	OneOtherArg string `json:"-"`
 }
 
 func (r ChatCompletionRequest) ParseToolChoice() (toolType, toolFunc string) {
@@ -383,10 +386,11 @@ func (f *ChatCompletionToolCallsFunction) Split(c *ChatCompletionStreamChoice, s
 }
 
 type ChatCompletionStreamChoiceDelta struct {
-	Content      string                           `json:"content,omitempty"`
-	Role         string                           `json:"role,omitempty"`
-	FunctionCall *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
-	ToolCalls    []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
+	Content          string                           `json:"content,omitempty"`
+	Role             string                           `json:"role,omitempty"`
+	FunctionCall     *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
+	ToolCalls        []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
+	ReasoningContent string                           `json:"reasoning_content,omitempty"`
 }
 
 func (m *ChatCompletionStreamChoiceDelta) ToolToFuncCalls() {

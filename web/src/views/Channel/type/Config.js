@@ -41,7 +41,7 @@ const defaultConfig = {
     test_model: '用于测试使用的模型，为空时无法测速,如：gpt-3.5-turbo，仅支持chat模型',
     models:
       '请选择该渠道所支持的模型,你也可以输入通配符*来匹配模型，例如：gpt-3.5*，表示支持所有gpt-3.5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3.5*是正确的，*gpt-3.5是错误的',
-    model_mapping: '模型映射关系：例如用户请求A模型，实际转发给渠道的模型为B。',
+    model_mapping: '模型映射关系：例如用户请求A模型，实际转发给渠道的模型为B。在B模型加前缀+，表示使用传入模型计费，例如：+gpt-3.5-turbo',
     model_headers: '自定义模型请求头，例如：{"key": "value"}',
     groups: '请选择该渠道所支持的用户组',
     only_chat: '如果选择了仅支持聊天，那么遇到有函数调用的请求会跳过该渠道',
@@ -70,7 +70,8 @@ const typeConfig = {
   3: {
     inputLabel: {
       base_url: 'AZURE_OPENAI_ENDPOINT',
-      other: '默认 API 版本'
+      other: '默认 API 版本',
+      provider_models_list: '从Azure获取已部署模型列表'
     },
     prompt: {
       base_url: '请填写AZURE_OPENAI_ENDPOINT',
@@ -85,6 +86,9 @@ const typeConfig = {
     modelGroup: 'Google PaLM'
   },
   14: {
+    inputLabel: {
+      provider_models_list: '从Claude获取模型列表'
+    },
     input: {
       models: [
         'claude-instant-1.2',
@@ -137,7 +141,7 @@ const typeConfig = {
       test_model: 'ERNIE-Speed'
     },
     prompt: {
-      key: '按照如下格式输入：APIKey|SecretKey'
+      key: '按照如下格式输入：APIKey|SecretKey, 如果开启了OpenAI API，请直接输入APIKEY'
     },
     modelGroup: 'Baidu'
   },
@@ -150,7 +154,8 @@ const typeConfig = {
   },
   17: {
     inputLabel: {
-      other: '插件参数'
+      other: '插件参数',
+      provider_models_list: '从Ali获取模型列表'
     },
     input: {
       models: ['qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen-max-longcontext', 'text-embedding-v1'],
@@ -438,8 +443,7 @@ const typeConfig = {
       provider_models_list: '从Siliconflow获取模型列表'
     },
     prompt: {
-      base_url: '',
-      test_model: ''
+      base_url: ''
     },
     modelGroup: 'Siliconflow'
   },

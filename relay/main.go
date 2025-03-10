@@ -11,6 +11,7 @@ import (
 	"one-api/model"
 	"one-api/relay/relay_util"
 	"one-api/types"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,12 +24,14 @@ func Relay(c *gin.Context) {
 	}
 
 	if err := relay.setRequest(); err != nil {
-		common.AbortWithMessage(c, http.StatusBadRequest, err.Error())
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusBadRequest)
+		relay.HandleError(openaiErr)
 		return
 	}
 
 	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-		common.AbortWithMessage(c, http.StatusServiceUnavailable, err.Error())
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusServiceUnavailable)
+		relay.HandleError(openaiErr)
 		return
 	}
 
@@ -47,11 +50,20 @@ func Relay(c *gin.Context) {
 		retryTimes = 0
 	}
 
+	startTime := c.GetTime("requestStartTime")
+	timeout := time.Duration(config.RetryTimeOut) * time.Second
+
 	for i := retryTimes; i > 0; i-- {
 		// 冻结通道
 		shouldCooldowns(c, channel, apiErr)
+
+		if time.Since(startTime) > timeout {
+			apiErr = common.StringErrorWrapperLocal("重试超时，上游负载已饱和，请稍后再试", "system_error", http.StatusTooManyRequests)
+			break
+		}
+
 		if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-			continue
+			break
 		}
 
 		channel = relay.getProvider().GetChannel()
@@ -68,7 +80,7 @@ func Relay(c *gin.Context) {
 	}
 
 	if apiErr != nil {
-		relayResponseWithErr(c, apiErr)
+		relay.HandleError(apiErr)
 	}
 }
 
@@ -98,6 +110,8 @@ func RelayHandler(relay RelayBaseInterface) (err *types.OpenAIErrorWithStatusCod
 		quota.Undo(relay.getContext())
 		return
 	}
+
+	quota.SetFirstResponseTime(relay.GetFirstResponseTime())
 
 	quota.Consume(relay.getContext(), usage, relay.IsStream())
 
