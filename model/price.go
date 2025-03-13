@@ -14,7 +14,7 @@ const (
 	DefaultPrice       = 30.0
 	DollarRate         = 0.002
 	RMBRate            = 0.014
-	DefaultCacheRatios = 0.5
+	DefaultCacheRatios = 1
 	DefaultAudioRatio  = 40
 
 	DefaultCachedWriteRatio = 1.25
