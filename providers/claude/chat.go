@@ -55,6 +55,10 @@ func (p *ClaudeProvider) CreateChatCompletion(request *types.ChatCompletionReque
 
 func (p *ClaudeProvider) CreateChatCompletionStream(request *types.ChatCompletionRequest) (requester.StreamReaderInterface[string], *types.OpenAIErrorWithStatusCode) {
 	request.OneOtherArg = p.GetOtherArg()
+	if strings.HasPrefix(p.BaseProvider.GetOriginalModel(), "thinking") {
+		request.OneOtherArg = "thinking"
+	}
+
 	claudeRequest, errWithCode := ConvertFromChatOpenai(request)
 	if errWithCode != nil {
 		return nil, errWithCode
@@ -102,15 +106,15 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 
 	if len(claudeRequest.System) > 1 && strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
-	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-7") {
+	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,output-128k-2025-02-19"
 	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
 		headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
 	}
 
-	if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
-		headers["anthropic-beta"] = "output-128k-2025-02-19"
-	}
+	//if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
+	//	headers["anthropic-beta"] = "output-128k-2025-02-19"
+	//}
 
 	// 创建请求
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(claudeRequest), p.Requester.WithHeader(headers))
@@ -437,7 +441,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	completionTokens := response.Usage.OutputTokens
 
 	promptTokens := response.Usage.InputTokens
-
+	promptTokens = int(float64(promptTokens) * 1.05)
 	openaiResponse.Usage.PromptTokens = promptTokens
 	openaiResponse.Usage.CompletionTokens = completionTokens
 	openaiResponse.Usage.TotalTokens = promptTokens + completionTokens
@@ -446,6 +450,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	isOk := ClaudeUsageToOpenaiUsage(&response.Usage, usage)
 	if !isOk {
 		usage.CompletionTokens = ClaudeOutputUsage(response)
+		usage.PromptTokens = int(float64(usage.PromptTokens) * 1.05)
 		usage.TotalTokens = usage.PromptTokens + usage.CompletionTokens
 	}
 
@@ -481,6 +486,8 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	}
 
 	if claudeResponse.Type == "message_stop" {
+		h.Usage.PromptTokens = int(float64(h.Usage.PromptTokens) * 1.05)
+		h.Usage.TotalTokens = h.Usage.PromptTokens + h.Usage.CompletionTokens
 		errChan <- io.EOF
 		*rawLine = requester.StreamClosed
 		return

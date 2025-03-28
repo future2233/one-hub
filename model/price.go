@@ -14,11 +14,11 @@ const (
 	DefaultPrice       = 30.0
 	DollarRate         = 0.002
 	RMBRate            = 0.014
-	DefaultCacheRatios = 1
+	DefaultCacheRatios = 0.5
 	DefaultAudioRatio  = 40
 
 	DefaultCachedWriteRatio = 1.25
-	DefaultCachedReadRatio  = 0.6
+	DefaultCachedReadRatio  = 0.5
 )
 
 type Price struct {
