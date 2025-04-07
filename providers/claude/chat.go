@@ -12,6 +12,7 @@ import (
 	"one-api/common/utils"
 	"one-api/providers/base"
 	"one-api/types"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
@@ -55,9 +56,6 @@ func (p *ClaudeProvider) CreateChatCompletion(request *types.ChatCompletionReque
 
 func (p *ClaudeProvider) CreateChatCompletionStream(request *types.ChatCompletionRequest) (requester.StreamReaderInterface[string], *types.OpenAIErrorWithStatusCode) {
 	request.OneOtherArg = p.GetOtherArg()
-	if strings.HasPrefix(p.BaseProvider.GetOriginalModel(), "thinking") {
-		request.OneOtherArg = "thinking"
-	}
 
 	claudeRequest, errWithCode := ConvertFromChatOpenai(request)
 	if errWithCode != nil {
@@ -255,16 +253,30 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	}
 
 	// 如果是3-7 默认开启thinking
-	if strings.Contains(request.Model, "claude-3-7-sonnet") && request.OneOtherArg == "thinking" {
+	if strings.Contains(request.Model, "claude-3-7-sonnet") && strings.HasPrefix(request.OneOtherArg, "thinking") {
 		if claudeRequest.MaxTokens == 0 {
 			claudeRequest.MaxTokens = 8192
 		}
-		// BudgetTokens 为 max_tokens 的 80%
-		claudeRequest.Thinking = &Thinking{
-			Type:         "enabled",
-			BudgetTokens: int(float64(claudeRequest.MaxTokens) * 0.8),
+
+		// 默认设置为max_tokens的80%
+		budgetTokens := int(float64(claudeRequest.MaxTokens) * 0.8)
+
+		// 检查是否是带数字的thinking格式 (thinking-XXXX)
+		if request.OneOtherArg != "thinking" {
+			// 尝试提取数字部分
+			parts := strings.Split(request.OneOtherArg, "-")
+			if len(parts) == 2 {
+				if num, err := strconv.Atoi(parts[1]); err == nil {
+					// 成功提取到数字，使用这个数字作为BudgetTokens
+					budgetTokens = num
+				}
+			}
 		}
 
+		claudeRequest.Thinking = &Thinking{
+			Type:         "enabled",
+			BudgetTokens: budgetTokens,
+		}
 		claudeRequest.TopP = nil
 	}
 
@@ -441,7 +453,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	completionTokens := response.Usage.OutputTokens
 
 	promptTokens := response.Usage.InputTokens
-	promptTokens = int(float64(promptTokens) * 1.05)
+	promptTokens = int(float64(promptTokens) * 1.10)
 	openaiResponse.Usage.PromptTokens = promptTokens
 	openaiResponse.Usage.CompletionTokens = completionTokens
 	openaiResponse.Usage.TotalTokens = promptTokens + completionTokens
@@ -450,7 +462,7 @@ func ConvertToChatOpenai(provider base.ProviderInterface, response *ClaudeRespon
 	isOk := ClaudeUsageToOpenaiUsage(&response.Usage, usage)
 	if !isOk {
 		usage.CompletionTokens = ClaudeOutputUsage(response)
-		usage.PromptTokens = int(float64(usage.PromptTokens) * 1.05)
+		usage.PromptTokens = int(float64(usage.PromptTokens) * 1.1)
 		usage.TotalTokens = usage.PromptTokens + usage.CompletionTokens
 	}
 
@@ -486,7 +498,7 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	}
 
 	if claudeResponse.Type == "message_stop" {
-		h.Usage.PromptTokens = int(float64(h.Usage.PromptTokens) * 1.05)
+		h.Usage.PromptTokens = int(float64(h.Usage.PromptTokens) * 1.1)
 		h.Usage.TotalTokens = h.Usage.PromptTokens + h.Usage.CompletionTokens
 		errChan <- io.EOF
 		*rawLine = requester.StreamClosed
