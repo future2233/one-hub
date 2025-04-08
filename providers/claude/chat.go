@@ -509,6 +509,12 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	case "message_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
+		if claudeResponse.Message.Usage.CacheCreationInputTokens > 0 {
+			h.Usage.PromptTokensDetails.CachedWriteTokens = claudeResponse.Message.Usage.CacheCreationInputTokens
+		}
+		if claudeResponse.Message.Usage.CacheReadInputTokens > 0 {
+			h.Usage.PromptTokensDetails.CachedReadTokens = claudeResponse.Message.Usage.CacheReadInputTokens
+		}
 
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
