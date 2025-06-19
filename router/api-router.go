@@ -13,8 +13,14 @@ import (
 func SetApiRouter(router *gin.Engine) {
 	apiRouter := router.Group("/api")
 	apiRouter.GET("/metrics", middleware.MetricsWithBasicAuth(), gin.WrapH(promhttp.Handler()))
-
 	apiRouter.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	systemInfo := apiRouter.Group("/system_info")
+	systemInfo.Use(middleware.RootAuth())
+	{
+		systemInfo.POST("/log", controller.SystemLog)
+	}
+
 	apiRouter.POST("/telegram/:token", middleware.Telegram(), controller.TelegramBotWebHook)
 	apiRouter.Use(middleware.GlobalAPIRateLimit())
 	{
@@ -52,6 +58,11 @@ func SetApiRouter(router *gin.Engine) {
 			selfRoute.Use(middleware.UserAuth())
 			{
 				selfRoute.GET("/dashboard", controller.GetUserDashboard)
+				selfRoute.GET("/dashboard/rate", controller.GetRateRealtime)
+				selfRoute.GET("/dashboard/uptimekuma/status-page", controller.UptimeKumaStatusPage)
+				selfRoute.GET("/dashboard/uptimekuma/status-page/heartbeat", controller.UptimeKumaStatusPageHeartbeat)
+				selfRoute.GET("/invoice", controller.GetUserInvoice)
+				selfRoute.GET("/invoice/detail", controller.GetUserInvoiceDetail)
 				selfRoute.GET("/self", controller.GetSelf)
 				selfRoute.PUT("/self", controller.UpdateSelf)
 				// selfRoute.DELETE("/self", controller.DeleteSelf)
@@ -86,6 +97,10 @@ func SetApiRouter(router *gin.Engine) {
 			optionRoute.PUT("/telegram/reload", controller.ReloadTelegramBot)
 			optionRoute.GET("/telegram/:id", controller.GetTelegramMenu)
 			optionRoute.DELETE("/telegram/:id", controller.DeleteTelegramMenu)
+			optionRoute.GET("/safe_tools", controller.GetSafeTools)
+			optionRoute.POST("/invoice/gen/:time", controller.GenInvoice)
+			optionRoute.POST("/invoice/update/:time", controller.UpdateInvoice)
+			optionRoute.POST("/system_info/log", controller.SystemLog)
 		}
 
 		modelOwnedByRoute := apiRouter.Group("/model_ownedby")
@@ -193,6 +208,7 @@ func SetApiRouter(router *gin.Engine) {
 			pricesRoute.POST("/multiple", controller.BatchSetPrices)
 			pricesRoute.PUT("/multiple/delete", controller.BatchDeletePrices)
 			pricesRoute.POST("/sync", controller.SyncPricing)
+			pricesRoute.GET("/updateService", controller.GetUpdatePriceService)
 
 		}
 

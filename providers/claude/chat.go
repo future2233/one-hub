@@ -102,7 +102,13 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 		headers["Accept"] = "text/event-stream"
 	}
 
-	if len(claudeRequest.System) > 1 && strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
+	// 智能检测System类型并设置相应的缓存头
+	hasAdvancedSystem := false
+	if systemContents, ok := claudeRequest.System.([]SystemContent); ok && len(systemContents) > 1 {
+		hasAdvancedSystem = true
+	}
+	
+	if hasAdvancedSystem && strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,output-128k-2025-02-19"
@@ -128,19 +134,36 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	claudeRequest := ClaudeRequest{
 		Model:         request.Model,
 		Messages:      make([]Message, 0),
-		System:        make([]SystemContent, 0), // 修改为 SystemContent 数组
-		MaxTokens:     defaultMaxTokens(request.MaxTokens),
+		System:        "",
+		MaxTokens:     request.MaxTokens,
 		StopSequences: nil,
 		Temperature:   request.Temperature,
 		TopP:          request.TopP,
 		Stream:        request.Stream,
 	}
 
-	var prevUserMessage bool
-	var systemMessage string
+	if request.Stop != nil {
+		stopBytes, err := json.Marshal(request.Stop)
+		if err == nil {
+			var stopSequences []string
+			if err := json.Unmarshal(stopBytes, &stopSequences); err == nil {
+				claudeRequest.StopSequences = stopSequences
+			} else if stop, ok := request.Stop.(string); ok {
+				claudeRequest.StopSequences = []string{stop}
+			}
+		}
+	}
 
-	for _, msg := range request.Messages {
-		if msg.Role == "system" {
+	systemMessage := ""
+	mgsLen := len(request.Messages) - 1
+	isThink := (request.OneOtherArg == "thinking" || request.Reasoning != nil)
+
+	for index, msg := range request.Messages {
+		if isThink && index == mgsLen && (msg.Role == types.ChatMessageRoleAssistant || msg.Role == types.ChatMessageRoleSystem) {
+			msg.Role = types.ChatMessageRoleUser
+		}
+
+		if msg.Role == types.ChatMessageRoleSystem {
 			systemMessage += msg.StringContent()
 			continue
 		}
@@ -149,31 +172,16 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 			return nil, common.ErrorWrapper(err, "conversion_error", http.StatusBadRequest)
 		}
 		if messageContent != nil {
-			if messageContent.Role == "user" && prevUserMessage {
-				assistantMessage := Message{
-					Role: "assistant",
-					Content: []MessageContent{
-						{
-							Type: "text",
-							Text: "ok",
-						},
-					},
-				}
-				claudeRequest.Messages = append(claudeRequest.Messages, assistantMessage)
-				prevUserMessage = false
-			} else {
-				prevUserMessage = messageContent.Role == "user"
-			}
 			claudeRequest.Messages = append(claudeRequest.Messages, *messageContent)
 		}
 	}
 
-	// 处理系统消息
+	// 处理系统消息 - 特性融合：支持both string和[]SystemContent
 	if systemMessage != "" {
 		if len(systemMessage) > 2500 && !strings.Contains(systemMessage, "no prompt cache") {
 			parts := strings.Split(systemMessage, "、、")
 			if len(parts) == 2 {
-				// 使用、、分隔的第一部分作为主要系统消息
+				// 使用、、分隔的第一部分作为主要系统消息，支持缓存控制
 				claudeRequest.System = []SystemContent{
 					{
 						Type: "text",
@@ -188,7 +196,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 					},
 				}
 			} else if len(parts) == 3 {
-				// 使用、、分隔的第一部分作为主要系统消息
+				// 使用、、分隔的第一部分作为主要系统消息，支持缓存控制
 				claudeRequest.System = []SystemContent{
 					{
 						Type: "text",
@@ -210,7 +218,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 					},
 				}
 			} else {
-				// 如果没有、、分隔符，取前45个字符作为主要系统消息
+				// 如果没有、、分隔符，取前45个字符作为主要系统消息，支持缓存控制
 				claudeRequest.System = []SystemContent{
 					{
 						Type: "text",
@@ -226,14 +234,9 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 				}
 			}
 		} else {
-			// 直接使用单个系统消息
+			// 直接使用单个系统消息（字符串格式）
 			systemMessage = strings.ReplaceAll(systemMessage, "no prompt cache", "")
-			claudeRequest.System = []SystemContent{
-				{
-					Type: "text",
-					Text: systemMessage,
-				},
-			}
+			claudeRequest.System = systemMessage
 		}
 	}
 
@@ -252,25 +255,17 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		claudeRequest.ToolChoice = ConvertToolChoice(toolType, toolFunc)
 	}
 
-	// 如果是3-7 默认开启thinking
-	if strings.Contains(request.Model, "claude-3-7-sonnet") && strings.HasPrefix(request.OneOtherArg, "thinking") {
-		if claudeRequest.MaxTokens == 0 {
-			claudeRequest.MaxTokens = 8192
-		}
+	if claudeRequest.MaxTokens == 0 {
+		claudeRequest.MaxTokens = config.ClaudeSettingsInstance.GetDefaultMaxTokens(request.Model)
+	}
 
-		// 默认设置为max_tokens的80%
-		budgetTokens := int(float64(claudeRequest.MaxTokens) * 0.8)
+	// 如果是3-7 默认开启thinking - 融合两种实现
+	if request.OneOtherArg == "thinking" || request.Reasoning != nil {
+		var opErr *types.OpenAIErrorWithStatusCode
+		claudeRequest.MaxTokens, claudeRequest.Thinking, opErr = getThinking(claudeRequest.MaxTokens, request.Reasoning)
 
-		// 检查是否是带数字的thinking格式 (thinking-XXXX)
-		if request.OneOtherArg != "thinking" {
-			// 尝试提取数字部分
-			parts := strings.Split(request.OneOtherArg, "-")
-			if len(parts) == 2 {
-				if num, err := strconv.Atoi(parts[1]); err == nil {
-					// 成功提取到数字，使用这个数字作为BudgetTokens
-					budgetTokens = num
-				}
-			}
+		if opErr != nil {
+			return nil, opErr
 		}
 
 		claudeRequest.Thinking = &Thinking{
@@ -281,6 +276,48 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	}
 
 	return &claudeRequest, nil
+}
+
+func getThinking(maxTokens int, reasoning *types.ChatReasoning) (newMaxtokens int, thinking *Thinking, err *types.OpenAIErrorWithStatusCode) {
+	newMaxtokens = maxTokens
+	thinking = &Thinking{
+		Type: "enabled",
+	}
+
+	if reasoning == nil || (reasoning.MaxTokens == 0 && reasoning.Effort == "") {
+		thinking.BudgetTokens = int(float64(maxTokens) * config.ClaudeSettingsInstance.BudgetTokensPercentage)
+	} else if reasoning.MaxTokens > 0 {
+		if reasoning.MaxTokens < 1024 {
+			err = common.StringErrorWrapper("budget_token must be greater than 1024", "budget_tokens_too_small", http.StatusBadRequest)
+			return
+		}
+
+		if reasoning.MaxTokens > maxTokens {
+			err = common.StringErrorWrapper(fmt.Sprintf("budget_token cannot be greater than the max_token, max_token: %d, budget_token: %d", maxTokens, reasoning.MaxTokens), "budget_tokens_too_large", http.StatusBadRequest)
+			return
+		}
+		thinking.BudgetTokens = reasoning.MaxTokens
+	} else {
+		switch reasoning.Effort {
+		case "low":
+			thinking.BudgetTokens = int(float64(maxTokens) * 0.2)
+		case "medium":
+			thinking.BudgetTokens = int(float64(maxTokens) * 0.5)
+		default:
+			thinking.BudgetTokens = int(float64(maxTokens) * 0.8)
+		}
+	}
+
+	// 如果低于1024,则设置为1024
+	if thinking.BudgetTokens < 1024 {
+		thinking.BudgetTokens = 1024
+	}
+
+	if newMaxtokens <= thinking.BudgetTokens {
+		newMaxtokens = 1280
+	}
+
+	return
 }
 
 func ConvertToolChoice(toolType, toolFunc string) *ToolChoice {
@@ -295,13 +332,6 @@ func ConvertToolChoice(toolType, toolFunc string) *ToolChoice {
 	}
 
 	return choice
-}
-
-func defaultMaxTokens(maxTokens int) int {
-	if maxTokens == 0 {
-		return 4096
-	}
-	return maxTokens
 }
 
 func convertMessageContent(msg *types.ChatCompletionMessage) (*Message, error) {
@@ -523,9 +553,7 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 
 	case "content_block_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
-		h.Usage.CompletionTokens += common.CountTokenText(claudeResponse.Delta.Text, h.Request.Model)
-		h.Usage.TotalTokens = h.Usage.PromptTokens + h.Usage.CompletionTokens
-
+		h.Usage.TextBuilder.WriteString(claudeResponse.Delta.Text)
 	case "content_block_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 

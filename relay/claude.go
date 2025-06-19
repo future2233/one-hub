@@ -1,6 +1,7 @@
 package relay
 
 import (
+	"encoding/json"
 	"math"
 	"net/http"
 	"one-api/common"
@@ -8,7 +9,9 @@ import (
 	"one-api/common/image"
 	"one-api/common/requester"
 	"one-api/providers/claude"
+	"one-api/safty"
 	"one-api/types"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,8 +25,12 @@ type relayClaudeOnly struct {
 
 func NewRelayClaudeOnly(c *gin.Context) *relayClaudeOnly {
 	c.Set("allow_channel_type", AllowChannelType)
-	relay := &relayClaudeOnly{}
-	relay.c = c
+	relay := &relayClaudeOnly{
+		relayBase: relayBase{
+			allowHeartbeat: true,
+			c:              c,
+		},
+	}
 
 	return relay
 }
@@ -59,12 +66,29 @@ func (r *relayClaudeOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 	}
 
 	r.claudeRequest.Model = r.modelName
+	// 内容审查
+	if config.EnableSafe {
+		for _, message := range r.claudeRequest.Messages {
+			if message.Content != nil {
+				CheckResult, _ := safty.CheckContent(message.Content)
+				if !CheckResult.IsSafe {
+					err = common.StringErrorWrapperLocal(CheckResult.Reason, CheckResult.Code, http.StatusBadRequest)
+					done = true
+					return
+				}
+			}
+		}
+	}
 
 	if r.claudeRequest.Stream {
 		var response requester.StreamReaderInterface[string]
 		response, err = chatProvider.CreateClaudeChatStream(r.claudeRequest)
 		if err != nil {
 			return
+		}
+
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
 		}
 
 		doneStr := func() string {
@@ -77,6 +101,10 @@ func (r *relayClaudeOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 		response, err = chatProvider.CreateClaudeChat(r.claudeRequest)
 		if err != nil {
 			return
+		}
+
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
 		}
 
 		openErr := responseJsonClient(r.c, response)
@@ -92,12 +120,28 @@ func (r *relayClaudeOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 	return
 }
 
-func (r *relayClaudeOnly) HandleError(err *types.OpenAIErrorWithStatusCode) {
+func (r *relayClaudeOnly) GetError(err *types.OpenAIErrorWithStatusCode) (int, any) {
 	newErr := FilterOpenAIErr(r.c, err)
 
 	claudeErr := claude.OpenaiErrToClaudeErr(&newErr)
 
-	r.c.JSON(newErr.StatusCode, claudeErr.ClaudeError)
+	return newErr.StatusCode, claudeErr.ClaudeError
+}
+
+func (r *relayClaudeOnly) HandleJsonError(err *types.OpenAIErrorWithStatusCode) {
+	statusCode, response := r.GetError(err)
+	r.c.JSON(statusCode, response)
+}
+
+func (r *relayClaudeOnly) HandleStreamError(err *types.OpenAIErrorWithStatusCode) {
+	_, response := r.GetError(err)
+
+	str, jsonErr := json.Marshal(response)
+	if jsonErr != nil {
+		return
+	}
+	r.c.Writer.Write([]byte("event: error\ndata: " + string(str) + "\n\n"))
+	r.c.Writer.Flush()
 }
 
 func CountTokenMessages(request *claude.ClaudeRequest, preCostType int) (int, error) {
@@ -110,18 +154,19 @@ func CountTokenMessages(request *claude.ClaudeRequest, preCostType int) (int, er
 	tokenNum := 0
 
 	tokensPerMessage := 4
+	var textMsg strings.Builder
 
 	for _, message := range request.Messages {
 		tokenNum += tokensPerMessage
 		switch v := message.Content.(type) {
 		case string:
-			tokenNum += common.GetTokenNum(tokenEncoder, v)
+			textMsg.WriteString(v)
 		case []any:
 			for _, m := range v {
 				content := m.(map[string]any)
 				switch content["type"] {
 				case "text":
-					tokenNum += common.GetTokenNum(tokenEncoder, content["text"].(string))
+					textMsg.WriteString(content["text"].(string))
 				case "image":
 					if preCostType == config.PreCostNotImage {
 						continue
@@ -142,6 +187,10 @@ func CountTokenMessages(request *claude.ClaudeRequest, preCostType int) (int, er
 				}
 			}
 		}
+	}
+
+	if textMsg.Len() > 0 {
+		tokenNum += common.GetTokenNum(tokenEncoder, textMsg.String())
 	}
 
 	return tokenNum, nil

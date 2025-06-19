@@ -1,10 +1,10 @@
 package model
 
 import (
-	"encoding/json"
 	"one-api/common/config"
 
 	"github.com/shopspring/decimal"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -21,14 +21,46 @@ const (
 	DefaultCachedReadRatio  = 0.1
 )
 
+func GetIncreaseTokens(tokens int, ratio float64) int {
+	return int(float64(tokens) * (ratio - 1))
+}
+
+var ExtraKeyIsPrompt = map[string]bool{
+	config.UsageExtraCache:            true,
+	config.UsageExtraCachedWrite:      true,
+	config.UsageExtraCachedRead:       true,
+	config.UsageExtraInputAudio:       true,
+	config.UsageExtraOutputAudio:      false,
+	config.UsageExtraReasoning:        false,
+	config.UsageExtraInputTextTokens:  true,
+	config.UsageExtraOutputTextTokens: false,
+	config.UsageExtraInputImageTokens: true,
+}
+
+func GetExtraPriceIsPrompt(key string) bool {
+	return ExtraKeyIsPrompt[key]
+}
+
+var defaultExtraPrice = map[string]float64{
+	config.UsageExtraCache:            0.5,
+	config.UsageExtraCachedWrite:      1.25,
+	config.UsageExtraCachedRead:       0.1,
+	config.UsageExtraInputAudio:       40,
+	config.UsageExtraOutputAudio:      40,
+	config.UsageExtraReasoning:        1,
+	config.UsageExtraInputTextTokens:  1,
+	config.UsageExtraOutputTextTokens: 1,
+}
+
 type Price struct {
 	Model       string  `json:"model" gorm:"type:varchar(100)" binding:"required"`
 	Type        string  `json:"type"  gorm:"default:'tokens'" binding:"required"`
 	ChannelType int     `json:"channel_type" gorm:"default:0" binding:"gte=0"`
 	Input       float64 `json:"input" gorm:"default:0" binding:"gte=0"`
 	Output      float64 `json:"output" gorm:"default:0" binding:"gte=0"`
+	Locked      bool    `json:"locked" gorm:"default:false"` // 如果模型为locked 则覆盖模式不会更新locked的模型价格
 
-	ExtraRatios map[string]float64 `json:"extra_ratios,omitempty" gorm:"-"`
+	ExtraRatios *datatypes.JSONType[map[string]float64] `json:"extra_ratios,omitempty" gorm:"type:json"`
 }
 
 func GetAllPrices() ([]*Price, error) {
@@ -36,22 +68,21 @@ func GetAllPrices() ([]*Price, error) {
 	if err := DB.Find(&prices).Error; err != nil {
 		return nil, err
 	}
+	// if config.ExtraTokenPriceJson == "" {
+	// 	return prices, nil
+	// }
 
-	if config.AudioTokenJson == "" {
-		return prices, nil
-	}
+	// extraRatios := make(map[string]map[string]float64)
+	// err := json.Unmarshal([]byte(config.ExtraTokenPriceJson), &extraRatios)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	audioToken := make(map[string]map[string]float64)
-	err := json.Unmarshal([]byte(config.AudioTokenJson), &audioToken)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, price := range prices {
-		if ratio, ok := audioToken[price.Model]; ok {
-			price.ExtraRatios = ratio
-		}
-	}
+	// for _, price := range prices {
+	// 	if ratio, ok := extraRatios[price.Model]; ok {
+	// 		price.ExtraRatios = ratio
+	// 	}
+	// }
 
 	return prices, nil
 }
@@ -88,23 +119,19 @@ func (price *Price) GetOutput() float64 {
 }
 
 func (price *Price) GetExtraRatio(key string) float64 {
-	if key == "cached_tokens_ratio" {
-		return DefaultCacheRatios
+	if price.ExtraRatios != nil {
+		extraRatios := price.ExtraRatios.Data()
+		if ratio, ok := extraRatios[key]; ok {
+			return ratio
+		}
 	}
 
-	if ratio, ok := price.ExtraRatios[key]; ok {
-		return ratio
+	ratio, ok := defaultExtraPrice[key]
+	if !ok {
+		return 1
 	}
 
-	if key == "cached_write_ratio" {
-		return DefaultCachedWriteRatio
-	}
-
-	if key == "cached_read_ratio" {
-		return DefaultCachedReadRatio
-	}
-
-	return DefaultAudioRatio
+	return ratio
 }
 
 func (price *Price) FetchInputCurrencyPrice(rate float64) string {
@@ -124,6 +151,8 @@ func UpdatePrices(tx *gorm.DB, models []string, prices *Price) error {
 			ChannelType: prices.ChannelType,
 			Input:       prices.Input,
 			Output:      prices.Output,
+			Locked:      prices.Locked,
+			ExtraRatios: prices.ExtraRatios,
 		}).Error
 
 	return err
@@ -142,6 +171,18 @@ func InsertPrices(tx *gorm.DB, prices []*Price) error {
 
 func DeleteAllPrices(tx *gorm.DB) error {
 	err := tx.Where("1=1").Delete(&Price{}).Error
+	return err
+}
+
+// 只删除未lock的价格
+func DeleteAllPricesNotLock(tx *gorm.DB) error {
+	err := tx.Where("locked = ?", false).Delete(&Price{}).Error
+	return err
+}
+
+// 只删除指定的未lock的数据
+func DeletePricesByModelNameAndNotLock(tx *gorm.DB, models []string) error {
+	err := tx.Where("locked = ? and model IN (?)", false, models).Delete(&Price{}).Error
 	return err
 }
 
@@ -460,12 +501,7 @@ func GetDefaultPrice() []*Price {
 	return prices
 }
 
-func GetDefaultAudioRatio() string {
-	if config.AudioTokenJson != "" {
-		return config.AudioTokenJson
-	}
+func GetDefaultExtraRatio() string {
+	return `{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens":16,"output_audio_tokens":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-realtime-preview":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens":8,"output_audio_tokens":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gemini-2.5-flash-preview-04-17":{"reasoning_tokens":5.833},"gpt-image-1":{"input_text_tokens": 0.5}}`
 
-	config.AudioTokenJson = `{"gpt-4o-audio-preview":{"input_audio_tokens_ratio":40,"output_audio_tokens_ratio":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens_ratio":40,"output_audio_tokens_ratio":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens_ratio":16,"output_audio_tokens_ratio":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens_ratio":67,"output_audio_tokens_ratio":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens_ratio":67,"output_audio_tokens_ratio":34},"gpt-4o-realtime-preview":{"input_audio_tokens_ratio":20,"output_audio_tokens_ratio":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens_ratio":20,"output_audio_tokens_ratio":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens_ratio":8,"output_audio_tokens_ratio":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens_ratio":17,"output_audio_tokens_ratio":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens_ratio":17,"output_audio_tokens_ratio":8.4}}`
-
-	return config.AudioTokenJson
 }

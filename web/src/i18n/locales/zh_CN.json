@@ -1,10 +1,30 @@
 {
   "dashboard": "仪表盘",
   "analytics": "分析",
+  "systemInfo": "系统信息",
+  "CPU Usage": "CPU 使用率",
+  "Memory Usage": "内存使用率",
+  "System Logs": "系统日志",
+  "view_more_logs_on_server": "需要查看更多系统日志请前往服务器查看",
+  "Auto Refresh": "自动刷新",
+  "Refresh Interval": "刷新间隔",
+  "1 second": "1 秒",
+  "3 seconds": "3 秒",
+  "5 seconds": "5 秒",
+  "10 seconds": "10 秒",
+  "30 seconds": "30 秒",
+  "1 minute": "1 分钟",
+  "Max Entries": "最大条数",
+  "Clear": "清空",
+  "No logs available": "暂无日志",
+  "No matching logs found": "未找到匹配的日志",
+  "Search logs...": "搜索日志...",
   "playground": "聊天",
   "price": "价格",
   "channel": "渠道",
   "token": "令牌",
+  "invoice": "月度账单",
+  "midjourney": "Midjourney",
   "log": "日志",
   "redemption": "兑换",
   "topup": "充值",
@@ -18,9 +38,12 @@
   "task": "异步任务",
   "operation": "运营",
   "paySetting": "支付设置",
+  "invite_count": "邀请人数",
+  "invite_reward": "邀请奖励",
   "menu": {
     "home": "首页",
     "about": "关于",
+    "status": "状态",
     "login": "登录",
     "signup": "注册",
     "signout": "注销",
@@ -28,6 +51,10 @@
     "error": "错误",
     "unknownVersion": "未知版本",
     "welcomeBack": "欢迎回来"
+  },
+  "sidebar": {
+    "totalQuota": "总额度",
+    "remainingBalance": "可用额度"
   },
   "registerForm": {
     "enterEmail": "请输入邮箱",
@@ -48,10 +75,13 @@
     "alreadyHaveAccount": "已经有帐号了?点击登录"
   },
   "dashboard_index": {
+    "title": "仪表盘",
     "model_price": "当前可用模型",
     "today_requests": "今日请求",
     "today_consumption": "今日消费",
     "today_tokens": "今日Token",
+    "tab_dashboard": "概览",
+    "tab_status": "状态",
     "no_data": "无数据",
     "statistics": "统计",
     "no_data_available": "暂无数据",
@@ -60,7 +90,27 @@
     "balance": "余额",
     "used": "已使用",
     "calls": "调用次数",
-    "unknown": "未知"
+    "unknown": "未知",
+    "week_model_statistics": "近七日模型统计",
+    "week_consumption_log": "近七日消费日志",
+    "7days_model_usage_pie": "近七日模型使用情况",
+    "total": "总次数",
+    "date": "日期",
+    "request_count": "请求次数",
+    "amount": "金额",
+    "tokens": "Tokens(输入/输出)",
+    "cache_tokens": "CacheTokens",
+    "request_time": "请求时间(s)",
+    "loading": "加载中...",
+    "quickStart": "快速开始",
+    "quickStartTip": "当您点击下面按钮时，系统会自动创建一个sys_playground的令牌",
+    "ComparedWithYesterday": "相比昨日",
+    "usage": "使用率",
+    "RPM": "当前RPM",
+    "TPM": "当前TPM",
+    "availability": "可用率",
+    "status_normal": "正常",
+    "status_abnormal": "异常"
   },
   "analytics_index": {
     "startTime": "开始时间",
@@ -163,7 +213,48 @@
     "addModelHeader": "添加自定义Header",
     "collapse": "收起",
     "expand": "展开",
-    "copyModels": "复制模型"
+    "copyModels": "复制模型",
+    "mapAdd": "添加{{name}}",
+    "mapAddByJson": "通过JSON添加{{name}}",
+    "mapJsonInput": "JSON 输入",
+    "listJsonError": "JSON格式错误，请确保输入的是数组格式",
+    "listJsonHelperText": "请输入JSON数组格式，例如：[\"项目1\", \"项目2\", \"项目3\"]",
+    "modelSelector": "模型选择器",
+    "openaiMode": "切换OpenAI格式获取模型",
+    "searchModels": "搜索模型",
+    "baseUrl": "API地址",
+    "openaiBaseUrlTip": "请输入OpenAI格式的API地址，例如：https://api.openai.com",
+    "fetchModels": "获取模型",
+    "selectAll": "全选",
+    "invertSelection": "反选",
+    "noModels": "没有模型",
+    "noMatchingModels": "没有匹配的模型",
+    "selectedCount": "已选{{count}}个模型",
+    "existingModels": "已选模型",
+    "otherModels": "其他模型",
+    "modelsFetched": "模型获取成功",
+    "selectedMappingCount": "已选{{count}}个模型映射",
+    "addMapping": "添加模型映射",
+    "addToModelMapping": "添加到模型映射",
+    "modelMapping": "模型映射",
+    "modelMappingSettings": "模型映射设置",
+    "prefixOrSuffix": "前缀/后缀",
+    "removePrefixHelp": "填写你要删除的前缀",
+    "removeSuffixHelp": "填写你要删除的后缀",
+    "addPlusSign": "使用映射前计费",
+    "mappingPreview": "映射预览",
+    "removePrefix": "删除前缀",
+    "removeSuffix": "删除后缀",
+    "collapseList": "收起列表",
+    "expandList": "展开列表",
+    "convertToLowercase": "模型名称转小写",
+    "filterMappedModels": "不填充映射前的模型名称",
+    "overwriteModels": "覆盖原有模型列表",
+    "overwriteModelsTip": "启用后将清空原有的模型列表，仅保留此次选择的模型",
+    "overwriteMappings": "覆盖原有映射关系",
+    "overwriteMappingsTip": "启用后将清空原有的映射关系，仅保留此次创建的映射",
+    "clearModels": "重置",
+    "clearModelsTip": "重置所有已选择的模型"
   },
   "token_index": {
     "token": "令牌",
@@ -195,7 +286,45 @@
     "enableCache": "是否开启缓存(开启后，将会缓存聊天记录，以减少消费)",
     "userGroup": "分组",
     "cancel": "取消",
-    "submit": "提交"
+    "submit": "提交",
+    "heartbeat": "心跳设置(实验性)",
+    "heartbeatTip": "心跳设置是指当在请求时，如果长时间没有返回数据，您的客户端可能会因为超时机制而断开连接。为了保持TCP连接不会因超时中断，您可以开启心跳设置，当请求超出您设置的开始时间，且无响应时，我们将会每隔5秒发送一次心跳请求(非流式请求返回空行，流式返回::PING)，以保持连接。注意：如果您在使用中转程序时，请不要开启该设置，可能会出现不可预知的问题。",
+    "heartbeatTimeout": "心跳开始时间(单位：秒)",
+    "heartbeatTimeoutHelperText": "最小值为30秒，最大值为90秒"
+  },
+  "invoice_index": {
+    "invoice": "月度账单",
+    "refresh": "刷新",
+    "id": "ID",
+    "name": "名称",
+    "status": "状态",
+    "amount": "金额",
+    "createdTime": "创建时间",
+    "paidTime": "支付时间",
+    "actions": "操作",
+    "deleteInvoice": "删除账单",
+    "confirmDeleteInvoice": "是否删除账单",
+    "close": "关闭",
+    "delete": "删除",
+    "paid": "已支付",
+    "unpaid": "未支付",
+    "date": "账单时间",
+    "requestCount": "请求总数",
+    "quota": "总金额",
+    "promptTokens": "输入tokens",
+    "completionTokens": "输出tokens",
+    "requestTime": "请求时长",
+    "tokens": "TOKEN(输入/输出)",
+    "alert": "每月1日凌晨生成上月账单数据",
+    "viewInvoice": "查看账单",
+    "modelName": "模型名称",
+    "option": "操作",
+    "username": "用户名",
+    "email": "邮箱",
+    "userinfo": "用户信息",
+    "usage_statistics": "使用统计",
+    "download": "下载PDF",
+    "usage_details": "账单详情"
   },
   "logPage": {
     "title": "日志",
@@ -218,16 +347,24 @@
     "quotaLabel": "额度",
     "detailLabel": "详情",
     "searchLogsInfo": "充值记录以及邀请记录请在日志中查询。充值记录请在日志中选择类型【充值】查询；邀请记录请在日志中选择【系统】查询",
-    "inputTextTokens": "输入文本Tokens",
-    "outputTextTokens": "输出文本Tokens",
-    "inputAudioTokens": "输入音频Tokens",
-    "outputAudioTokens": "输出音频Tokens",
-    "cachedTokens": "缓存Tokens",
-    "cachedWriteTokens": "缓存写入Tokens",
-    "cachedReadTokens": "缓存读取Tokens",
+    "inputTextTokens": "输入文本Tokens (* {{ ratio }})",
+    "outputTextTokens": "输出文本Tokens (* {{ ratio }})",
+    "inputAudioTokens": "输入音频Tokens (* {{ ratio }})",
+    "outputAudioTokens": "输出音频Tokens (* {{ ratio }})",
+    "cachedTokens": "缓存Tokens (* {{ ratio }})",
+    "cachedWriteTokens": "缓存写入Tokens (* {{ ratio }})",
+    "cachedReadTokens": "缓存读取Tokens (* {{ ratio }})",
+    "reasoningTokens": "推理Tokens (* {{ ratio }})",
     "totalInputTokens": "计算输入Tokens",
     "totalOutputTokens": "计算输出Tokens",
     "sourceIp": "来源IP",
+    "logType": {
+      "all": "全部",
+      "recharge": "充值",
+      "consumption": "消费",
+      "management": "管理",
+      "system": "系统"
+    },
     "content": {
       "channel_group": "分组: {{ channel_group }}",
       "group_discount": "分组折扣: {{ discount }}",
@@ -242,6 +379,22 @@
       "free": "免费",
       "old_log": "旧版记录",
       "illustrate": "* 本条记录为系统升级前所记录的log"
+    },
+    "quotaDetail": {
+      "saved": "节省 ",
+      "originalPrice": "原始价格",
+      "inputPrice": "原输入价格",
+      "outputPrice": "原输出价格",
+      "groupRatio": "分组倍率",
+      "groupRatioValue": "分组倍率",
+      "actualPrice": "实际价格",
+      "input": "实际输入价格",
+      "output": "实际输出价格",
+      "finalCalculation": "最终计算",
+      "originalBilling": "原始计费",
+      "actualBilling": "实际计费",
+      "calculationNote": "PS：本系统按照积分计算，所有金额均为积分换算而来，1积分=$0.000002，最低消费为1积分，本计算步骤仅供参考，以实际扣费为准",
+      "times": "倍"
     }
   },
   "redemptionPage": {
@@ -408,6 +561,7 @@
     "keepSafe": "请妥善保管。如有泄漏，请立即重置。"
   },
   "pricingPage": {
+    "title": "模型价格",
     "currencyInfo1": "美元",
     "currencyInfo2": "：1 === $0.002 / 1K tokens",
     "currencyInfo3": "人民币",
@@ -430,16 +584,34 @@
     "channelType": "供应商",
     "availableModels": "可用模型",
     "group": "分组",
+    "free": "免费",
+    "RPM": "API速率",
     "inputMultiplier": "输入价格",
     "outputMultiplier": "输出价格",
+    "input": "输入",
+    "output": "输出",
     "rate": "倍率",
     "search": "搜索",
     "tokens": "按量付费",
     "times": "按次付费",
+    "all": "全部",
+    "price": "价格",
+    "extraRatios": "扩展价格",
+    "noExtraRatios": "没有扩展价格",
     "noneGroup": "当前分组不可用",
     "other": "其他",
-    "inputAudioTokensRatio": "音频输入倍率",
-    "outputAudioTokensRatio": "音频输出倍率"
+    "input_audio_tokens": "音频输入倍率",
+    "output_audio_tokens": "音频输出倍率",
+    "cached_tokens": "缓存倍率",
+    "cached_write_tokens": "缓存写入倍率",
+    "cached_read_tokens": "缓存读取倍率",
+    "reasoning_tokens": "推理倍率",
+    "input_text_tokens": "输入文本倍率",
+    "output_text_tokens": "输出文本倍率",
+    "input_image_tokens": "输入图片倍率",
+    "output_image_tokens": "输出图片倍率",
+    "showAll": "显示所有",
+    "onlyAvailable": "只显示可用"
   },
   "paymentPage": {
     "orderList": "订单列表",
@@ -534,6 +706,12 @@
         "approximateToken": "使用近似的方式估算 token 数以减少计算量",
         "saveButton": "保存通用设置"
       },
+      "invoice": {
+        "title": "账单设置",
+        "genTime": "账单时间",
+        "genMonthInvoice": "生成月账单",
+        "updateMonthInvoice": "更新月账单"
+      },
       "otherSettings": {
         "title": "其他设置",
         "mjNotify": "Midjourney 允许回调（会泄露服务器ip地址）",
@@ -625,15 +803,47 @@
         "info": "配置聊天链接，该配置在令牌中的聊天生效以及首页的Playground中的聊天生效. <br />链接中可以使&#123;key&#125;替换用户的令牌，&#123;server&#125;替换服务器地址。例如：{'https://chat.oneapi.pro/#/?settings={\"key\":\"sk-{key}\",\"url\":\"{server}\"}'}<br />如果未配置，会默认配置以下4个链接：<br />ChatGPT Next ： {'https://chat.oneapi.pro/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />chatgpt-web-midjourney-proxy ： {'https://vercel.ddaiai.com/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />AMA 问天 ： {'ama://set-api-key?server={server}&key={key}'}<br />opencat ： {'opencat://team/join?domain={server}&token={key}'}<br />排序规则：值越大越靠前，值相同则按照配置顺序",
         "save": "保存聊天链接设置"
       },
-      "audioTokenSettings": {
-        "title": "音频Token设置",
-        "info": "配置音频倍率. 配置格式为JSON，键为模型名称，值为输入输出Token倍率。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
-        "save": "保存音频Token设置"
+      "extraTokenPriceJson": {
+        "title": "额外Token价格设置",
+        "info": "配置额外Token价格. 配置格式为JSON，键为模型名称，值为输入输出Token倍率。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
+        "save": "保存额外Token价格设置"
       },
       "disableChannelKeywordsSettings": {
         "title": "禁用通道关键词设置",
         "info": "配置禁用通道关键词，每行一个关键词。",
         "save": "保存禁用通道关键词设置"
+      },
+      "claudeSettings": {
+        "title": "Claude设置",
+        "budgetTokensPercentage": {
+          "label": "默认思考Token百分比",
+          "placeholder": "请输入默认思考Token百分比"
+        },
+        "defaultMaxTokens": {
+          "label": "默认MaxToken数量",
+          "placeholder": "请输入默认MaxToken数量,json格式, default代表默认值， 例如：{\"default\": 1000, \"claude-3-7-sonnet-latest\": 128000}"
+        },
+        "save": "保存Claude设置"
+      },
+      "geminiSettings": {
+        "title": "Gemini设置",
+        "geminiOpenThink": {
+          "label": "开启输出推理的模型",
+          "placeholder": "请输入需要开启推理输出的模型,json格式,例如：{\"gemini-2.5-pro-preview-05-06\": true}"
+        },
+        "save": "保存Gemini设置"
+      },
+      "safetySettings": {
+        "title": "系统安全设置",
+        "enableSafe": "开启 Prompt 安全检查",
+        "safeToolName": {
+          "label": "安全检查工具"
+        },
+        "safeKeyWords": {
+          "label": "关键词列表",
+          "placeholder": "请输入关键词，每行一个"
+        },
+        "save": "保存设置"
       }
     },
     "systemSettings": {
@@ -847,11 +1057,13 @@
     "fetchData": "获取数据",
     "noUpdates": "无更新",
     "newModels": "新增模型",
-    "priceChangeModels": "价格变动模型(仅供参考，如果你自己修改了对应模型的价格请忽略)",
+    "priceChangeModels": "价格变动模型(仅供参考)",
     "note": "注意",
-    "overwriteOrAddOnly": "你可以选择覆盖或者仅添加新增，如果你选择覆盖，将会删除你自己添加的模型价格，完全使用远程配置，如果你选择仅添加新增，将会只会添加 新增模型的价格",
-    "overwriteData": "覆盖数据",
-    "addNewOnly": "仅添加新增",
+    "overwriteOrAddOnly": "你可以选择覆盖或者仅添加新增或者只更新现有，如果你选择覆盖，将会删除你自己添加的模型价格，完全使用远程配置，如果你选择仅添加新增，将会只会添加新增模型的价格，如果你选择只更新现有，将会只会更新现有模型的价格。（锁定的价格不会被更新修改）",
+    "priceServerTotal": "价格服务器总数",
+    "updateModeAdd": "只新增",
+    "updateModeUpdate": "只更新现有",
+    "updateModeOverwrite": "覆盖所有",
     "cancel": "取消",
     "dataFormatIncorrect": "数据格式不正确",
     "pleaseFetchData": "请先获取数据",
@@ -859,7 +1071,15 @@
     "operationCompleted": "操作成功完成！",
     "inputMultiplierChanged": "输入倍率由",
     "to": "变为",
-    "outputMultiplierChanged": "输出倍率由"
+    "outputMultiplierChanged": "输出倍率由",
+    "extraRatiosAdded": "新增扩展倍率",
+    "extraRatiosRemoved": "删除扩展倍率",
+    "extraRatiosChanged": "扩展倍率变化",
+    "extraRatiosChanges": "扩展倍率变动",
+    "extraRatiosChangesTip": "扩展倍率变动：{{changes}}",
+    "added": "新增",
+    "removed": "删除",
+    "modified": "修改"
   },
   "error": {
     "unknownError": "未知错误"
@@ -887,6 +1107,7 @@
     "back": "返回",
     "none": "无",
     "show": "显示",
+    "reset": "重置",
     "copyUrl": "复制地址",
     "downImg": "下载图片",
     "newWindos": "新窗口打开",
@@ -900,7 +1121,14 @@
     "executeConfirm": "执行",
     "deleteConfirm": "是否删除 {{title}}?",
     "deleteSuccess": "删除成功！",
-    "deleteError": "删除失败: {{message}}"
+    "deleteError": "删除失败: {{message}}",
+    "jsonFormatError": "JSON 格式错误",
+    "pageSize": "每页条数",
+    "search": "搜索",
+    "actions": "操作",
+    "total": "总数",
+    "noDataAvailable": "没有数据可用",
+    "loading": "加载中..."
   },
   "channel_row": {
     "priorityTip": "优先级不能小于 0",
@@ -921,6 +1149,8 @@
     "check": "检测",
     "manual": "手动",
     "auto": "自动",
+    "key": "密钥",
+    "keyRequired": "请输入密钥",
     "testAllChannel": "已成功开始测试所有通道，请刷新页面查看结果。",
     "updateChannelBalance": "已更新完毕所有已启用通道余额！",
     "delChannelCount": "已删除所有禁用渠道，共计 {{count}} 个",
@@ -1006,7 +1236,18 @@
     "delTip": "确定删除?",
     "delInfoTip": "确定删除 {{name}} 吗？",
     "delGroup": "删除价格组",
-    "delGroupTip": "是否删除价格组？"
+    "delGroupTip": "是否删除价格组？",
+    "locked_title": "锁定价格",
+    "locked": "锁定价格",
+    "unlocked": "不锁定价格",
+    "lockedTip": "价格锁定后无法通过价格更新服务器和程序自带价格进行覆盖。如果您所配置的价格希望随程序或者价格服务器同步更新请勿锁定",
+    "extraRatios": "额外扩展倍率",
+    "selectExtraRatio": "选择扩展倍率",
+    "noExtraRatios": "暂无额外扩展倍率，请从下拉框选择添加",
+    "promptRatio": "提示倍率",
+    "completionRatio": "完成倍率",
+    "noAvailableRatios": "没有可用的扩展倍率",
+    "delMultipleInfoTip": "确定删除所选的 {{count}} 个价格吗？"
   },
   "redemption_edit": {
     "requiredQuota": "必须大于等于0",
@@ -1139,6 +1380,7 @@
   "使用代码执行功能，开启后，计算tokens不准确，建议个人使用开启": "使用代码执行功能，开启后，计算tokens不准确，建议个人使用开启",
   "是否启用代码执行": "是否启用代码执行",
   "taskPage": {
+    "title": "异步任务",
     "task": "任务ID",
     "subTime": "提交时间",
     "finishTime": "完成时间",
@@ -1167,6 +1409,12 @@
     "name": "名称",
     "ratio": "倍率",
     "public": "是否公开",
+    "promotion": "自动升级",
+    "promotionTip": "启用后，用户充值金额满足最小-最大条件时将自动升级到此用户组",
+    "min": "最小金额",
+    "minTip": "自动升级所需的最小充值金额",
+    "max": "最大金额",
+    "maxTip": "此用户组级别的最大充值金额",
     "enable": "是否启用",
     "symbolTip": "标识用于区分用户组,请使用英文，不可重复",
     "nameTip": "给用户看的名称",
@@ -1183,5 +1431,7 @@
     "action": "操作",
     "idTip": "渠道ID,数字，请设置 大于1000以上的数字，设置好不可更改",
     "nameTip": "渠道名称"
-  }
+  },
+  "禁用流式的模型": "禁用流式的模型",
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道"
 }

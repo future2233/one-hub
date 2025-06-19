@@ -1,16 +1,41 @@
-import { useEffect, useState, useContext } from 'react';
-import { Grid, Typography, Box } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Grid, Box, Stack, Typography, Button } from '@mui/material';
 import { gridSpacing } from 'store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
 import ApexCharts from 'ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
 import { getLastSevenDays, generateBarChartOptions, renderChartNumber } from 'utils/chart';
 import { API } from 'utils/api';
-import { showError, calculateQuota, renderNumber } from 'utils/common';
-import UserCard from 'ui-component/cards/UserCard';
+import { showError, calculateQuota } from 'utils/common';
+import ModelUsagePieChart from './component/ModelUsagePieChart';
 import { useTranslation } from 'react-i18next';
-import { UserContext } from 'contexts/UserContext';
-import Label from 'ui-component/Label';
+import InviteCard from './component/InviteCard';
+import QuotaLogWeek from './component/QuotaLogWeek';
+import QuickStartCard from './component/QuickStartCard';
+import RPM from './component/RPM';
+import StatusPanel from './component/StatusPanel';
+import { useSelector } from 'react-redux';
+
+// TabPanel component for tab content
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`dashboard-tabpanel-${index}`}
+      aria-labelledby={`dashboard-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -18,9 +43,16 @@ const Dashboard = () => {
   const [requestChart, setRequestChart] = useState(null);
   const [quotaChart, setQuotaChart] = useState(null);
   const [tokenChart, setTokenChart] = useState(null);
-  const [users, setUsers] = useState([]);
   const { t } = useTranslation();
-  const { userGroup } = useContext(UserContext);
+  const [modelUsageData, setModelUsageData] = useState([]);
+  const [currentTab, setCurrentTab] = useState(0);
+
+  const [dashboardData, setDashboardData] = useState(null);
+  const siteInfo = useSelector((state) => state.siteInfo);
+
+  const handleTabChange = (newValue) => {
+    setCurrentTab(newValue);
+  };
 
   const userDashboard = async () => {
     try {
@@ -28,11 +60,13 @@ const Dashboard = () => {
       const { success, message, data } = res.data;
       if (success) {
         if (data) {
+          setDashboardData(data);
           let lineData = getLineDataGroup(data);
           setRequestChart(getLineCardOption(lineData, 'RequestCount'));
           setQuotaChart(getLineCardOption(lineData, 'Quota'));
           setTokenChart(getLineCardOption(lineData, 'PromptTokens'));
           setStatisticalData(getBarDataGroup(data));
+          setModelUsageData(getModelUsageData(data));
         }
       } else {
         showError(message);
@@ -43,58 +77,52 @@ const Dashboard = () => {
     }
   };
 
-  const loadUser = async () => {
-    try {
-      let res = await API.get(`/api/user/self`);
-      const { success, message, data } = res.data;
-      if (success) {
-        setUsers(data);
-      } else {
-        showError(message);
-      }
-    } catch (error) {
-      return;
-    }
-  };
-
   useEffect(() => {
     userDashboard();
-    loadUser();
   }, []);
 
-  return (
+  // Dashboard content
+  const dashboardContent = (
     <Grid container spacing={gridSpacing}>
+      {/* 支持的模型   */}
       <Grid item xs={12}>
         <SupportModels />
       </Grid>
+      {/* 今日请求、消费、token */}
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid item lg={4} xs={12}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_requests')}
               type="request"
               chartData={requestChart?.chartData}
               todayValue={requestChart?.todayValue}
+              lastDayValue={requestChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_consumption')}
               type="quota"
               chartData={quotaChart?.chartData}
               todayValue={quotaChart?.todayValue}
+              lastDayValue={quotaChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_tokens')}
               type="token"
               chartData={tokenChart?.chartData}
               todayValue={tokenChart?.todayValue}
+              lastDayValue={tokenChart?.lastDayValue}
             />
+          </Grid>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+            <RPM />
           </Grid>
         </Grid>
       </Grid>
@@ -102,79 +130,113 @@ const Dashboard = () => {
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
           <Grid item lg={8} xs={12}>
-            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
+            {/* 7日模型消费统计 */}
+            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
+            <Box mt={2}>
+              {/* 7日消费统计 */}
+              <QuotaLogWeek data={dashboardData} />
+            </Box>
           </Grid>
+
           <Grid item lg={4} xs={12}>
-            <UserCard>
-              <Box
-                sx={{
-                  pt: 4,
-                  pb: 4,
-                  px: 3,
-                  textAlign: 'center'
-                }}
-              >
-                <Typography variant="h4" sx={{ mb: 0.5 }}>
-                  {users.username}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  {users.email}
-                </Typography>
-
-                <Label color={'primary'} variant="outlined" sx={{ mb: 3 }}>
-                  {userGroup?.[users.group]?.name || users.group}
-                  (RPM:{userGroup?.[users.group]?.api_rate || 0})
-                </Label>
-
-                {/* 统计信息区域 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2.5
-                  }}
-                >
-                  {[
-                    {
-                      label: t('dashboard_index.balance'),
-                      value: users?.quota ? '$' + calculateQuota(users.quota) : t('dashboard_index.unknown')
-                    },
-                    {
-                      label: t('dashboard_index.used'),
-                      value: users?.used_quota ? '$' + calculateQuota(users.used_quota) : t('dashboard_index.unknown')
-                    },
-                    { label: t('dashboard_index.calls'), value: users?.request_count || t('dashboard_index.unknown') }
-                  ].map((item, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        px: 2,
-                        py: 1.5,
-                        borderRadius: 2,
-                        bgcolor: 'rgba(145, 158, 171, 0.08)',
-                        '&:hover': {
-                          bgcolor: 'rgba(145, 158, 171, 0.12)'
-                        }
-                      }}
-                    >
-                      <Typography variant="body2">{item.label}</Typography>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {item.value}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            </UserCard>
+            {/* 用户信息 */}
+            <ModelUsagePieChart isLoading={isLoading} data={modelUsageData} />
+            <Box mt={2}>
+              <QuickStartCard />
+            </Box>
+            {/* 邀请 */}
+            <Box mt={2}>
+              <InviteCard />
+            </Box>
           </Grid>
         </Grid>
       </Grid>
     </Grid>
   );
+
+  return (
+    <>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+        <Stack direction="row" alignItems="center" spacing={3}>
+          <Stack direction="column" spacing={1}>
+            <Typography variant="h2">{t('dashboard_index.title')}</Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Dashboard
+            </Typography>
+          </Stack>
+
+          {siteInfo.UptimeEnabled && (
+            <Stack direction="row" spacing={1}>
+              <Button 
+                onClick={() => handleTabChange(0)}
+                variant={currentTab === 0 ? "contained" : "text"}
+                size="small"
+                disableElevation
+                sx={{
+                  padding: '6px 16px',
+                  borderRadius: '4px',
+                  backgroundColor: currentTab === 0 ? 'primary.main' : 'transparent',
+                  color: currentTab === 0 ? 'white' : 'text.primary',
+                  '&:hover': {
+                    backgroundColor: currentTab === 0 ? 'primary.dark' : 'action.hover'
+                  }
+                }}
+              >
+                {t('dashboard_index.tab_dashboard')}
+              </Button>
+              <Button 
+                onClick={() => handleTabChange(1)}
+                variant={currentTab === 1 ? "contained" : "text"}
+                size="small"
+                disableElevation
+                sx={{
+                  padding: '6px 16px',
+                  borderRadius: '4px',
+                  backgroundColor: currentTab === 1 ? 'primary.main' : 'transparent',
+                  color: currentTab === 1 ? 'white' : 'text.primary',
+                  '&:hover': {
+                    backgroundColor: currentTab === 1 ? 'primary.dark' : 'action.hover'
+                  }
+                }}
+              >
+                {t('dashboard_index.tab_status')}
+              </Button>
+            </Stack>
+          )}
+        </Stack>
+      </Stack>
+
+      {siteInfo.UptimeEnabled ? (
+        <>
+          <TabPanel value={currentTab} index={0}>
+            {dashboardContent}
+          </TabPanel>
+          <TabPanel value={currentTab} index={1}>
+            <StatusPanel />
+          </TabPanel>
+        </>
+      ) : (
+        dashboardContent
+      )}
+    </>
+  );
 };
+
+// 新增函数来处理模型使用数据
+function getModelUsageData(data) {
+  const modelUsage = {};
+  data.forEach((item) => {
+    if (!modelUsage[item.ModelName]) {
+      modelUsage[item.ModelName] = 0;
+    }
+    modelUsage[item.ModelName] += item.RequestCount;
+  });
+
+  return Object.entries(modelUsage).map(([name, count]) => ({
+    name,
+    value: count
+  }));
+}
 export default Dashboard;
 
 function getLineDataGroup(statisticalData) {
@@ -230,17 +292,18 @@ function getBarDataGroup(data) {
     }
   }
 
-  let chartData = generateBarChartOptions(lastSevenDays, result, '美元', 3);
-  chartData.options.title.text = '7日总消费：$' + renderChartNumber(totalCosts, 3);
+  let chartData = generateBarChartOptions(lastSevenDays, result, 'USD', 3);
+  chartData.options.title.text = 'Total：$' + renderChartNumber(totalCosts, 3);
 
   return chartData;
 }
 
 function getLineCardOption(lineDataGroup, field) {
   let todayValue = 0;
+  let lastDayValue = 0;
   let chartData = null;
-  const lastItem = lineDataGroup.length - 1;
-  let lineData = lineDataGroup.map((item, index) => {
+
+  let lineData = lineDataGroup.map((item) => {
     let tmp = {
       x: item.date,
       y: item[field]
@@ -254,24 +317,32 @@ function getLineCardOption(lineDataGroup, field) {
         break;
     }
 
-    if (index == lastItem) {
-      todayValue = tmp.y;
-    }
     return tmp;
   });
+
+  // 获取今天和昨天的数据
+  if (lineData.length > 1) {
+    todayValue = lineData[lineData.length - 1].y;
+    if (lineData.length > 2) {
+      lastDayValue = lineData[lineData.length - 2].y;
+    }
+  }
 
   switch (field) {
     case 'RequestCount':
       // chartData = generateLineChartOptions(lineData, '次');
-      todayValue = renderNumber(todayValue);
+      lastDayValue = parseFloat(lastDayValue);
+      todayValue = parseFloat(todayValue);
       break;
     case 'Quota':
       // chartData = generateLineChartOptions(lineData, '美元');
-      todayValue = '$' + renderNumber(todayValue);
+      lastDayValue = parseFloat(lastDayValue);
+      todayValue = '$' + parseFloat(todayValue);
       break;
     case 'PromptTokens':
       // chartData = generateLineChartOptions(lineData, '');
-      todayValue = renderNumber(todayValue);
+      lastDayValue = parseFloat(lastDayValue);
+      todayValue = parseFloat(todayValue);
       break;
   }
 
@@ -283,5 +354,5 @@ function getLineCardOption(lineDataGroup, field) {
     ]
   };
 
-  return { chartData: chartData, todayValue: todayValue };
+  return { chartData: chartData, todayValue: todayValue, lastDayValue: lastDayValue };
 }

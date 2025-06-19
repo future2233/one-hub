@@ -6,6 +6,7 @@ import (
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/utils"
+	"slices"
 	"strings"
 
 	"gorm.io/datatypes"
@@ -30,16 +31,27 @@ type Channel struct {
 	Group              string  `json:"group" form:"group" gorm:"type:varchar(32);default:'default'"`
 	Tag                string  `json:"tag" form:"tag" gorm:"type:varchar(32);default:''"`
 	UsedQuota          int64   `json:"used_quota" gorm:"bigint;default:0"`
-	ModelMapping       *string `json:"model_mapping" gorm:"type:varchar(1024);default:''"`
+	ModelMapping       *string `json:"model_mapping" gorm:"type:text"`
 	ModelHeaders       *string `json:"model_headers" gorm:"type:varchar(1024);default:''"`
+	CustomParameter    *string `json:"custom_parameter" gorm:"type:varchar(1024);default:''"`
 	Priority           *int64  `json:"priority" gorm:"bigint;default:0"`
 	Proxy              *string `json:"proxy" gorm:"type:varchar(255);default:''"`
 	TestModel          string  `json:"test_model" form:"test_model" gorm:"type:varchar(50);default:''"`
 	OnlyChat           bool    `json:"only_chat" form:"only_chat" gorm:"default:false"`
 	PreCost            int     `json:"pre_cost" form:"pre_cost" gorm:"default:1"`
 
+	DisabledStream *datatypes.JSONSlice[string] `json:"disabled_stream,omitempty" gorm:"type:json"`
+
 	Plugin    *datatypes.JSONType[PluginType] `json:"plugin" form:"plugin" gorm:"type:json"`
 	DeletedAt gorm.DeletedAt                  `json:"-" gorm:"index"`
+}
+
+func (c *Channel) AllowStream(modelName string) bool {
+	if c.DisabledStream == nil {
+		return true
+	}
+
+	return !slices.Contains(*c.DisabledStream, modelName)
 }
 
 type PluginType map[string]map[string]interface{}
@@ -246,6 +258,13 @@ func (channel *Channel) GetModelMapping() string {
 		return ""
 	}
 	return *channel.ModelMapping
+}
+
+func (channel *Channel) GetCustomParameter() string {
+	if channel.CustomParameter == nil {
+		return ""
+	}
+	return *channel.CustomParameter
 }
 
 func (channel *Channel) Insert() error {

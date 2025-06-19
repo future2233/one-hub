@@ -1,4 +1,22 @@
 {
+  "System Logs": "System Logs",
+  "view_more_logs_on_server": "To view more system logs, please go to the server",
+  "systemInfo": "System Info",
+  "Auto Refresh": "Auto Refresh",
+  "Refresh Interval": "Refresh Interval",
+  "1 second": "1 second",
+  "3 seconds": "3 seconds",
+  "5 seconds": "5 seconds",
+  "10 seconds": "10 seconds",
+  "30 seconds": "30 seconds",
+  "1 minute": "1 minute",
+  "Max Entries": "Max Entries",
+  "Clear": "Clear",
+  "No logs available": "No logs available",
+  "No matching logs found": "No matching logs found",
+  "Search logs...": "Search logs...",
+  "invite_count": "Invite Count",
+  "invite_reward": "Invite Reward",
   "AZURE_OPENAI_ENDPOINT": "AZURE_OPENAI_ENDPOINT",
   "CheckUpdatesTable": {
     "addNewOnly": "Add New Only",
@@ -18,7 +36,35 @@
     "pleaseFetchData": "Please fetch data first",
     "priceChangeModels": "Price Change Models (for reference only, ignore if you have modified the prices yourself)",
     "to": "to",
-    "url": "URL"
+    "url": "URL",
+    "priceServerTotal": "Price Server Total",
+    "updateModeAdd": "Add Only",
+    "updateModeUpdate": "Update Only",
+    "updateModeOverwrite": "Overwrite All",
+    "added": "Add",
+    "extraRatiosAdded": "Increase the expansion rate",
+    "extraRatiosChanged": "Changes in magnification ratio",
+    "extraRatiosChanges": "Changes in magnification ratio",
+    "extraRatiosChangesTip": "Changes in magnification: {{changes}}",
+    "extraRatiosRemoved": "Remove magnification ratio",
+    "modified": "Edit",
+    "removed": "Delete"
+  },
+  "menu": {
+    "home": "Home",
+    "about": "About",
+    "status": "Status",
+    "login": "Login",
+    "signup": "Sign up",
+    "signout": "Sign out",
+    "console": "Console",
+    "error": "Error",
+    "unknownVersion": "Unknown Version",
+    "welcomeBack": "Welcome Back"
+  },
+  "sidebar": {
+    "totalQuota": "Total Quota",
+    "remainingBalance": "Remaining Balance"
   },
   "Header 配置": "Header configuration",
   "about": {
@@ -89,7 +135,35 @@
     "requiredModels": "Model cannot be empty",
     "requiredName": "Name is required",
     "validJson": "Must be a valid JSON string",
-    "copyModels": "Copy model"
+    "copyModels": "Copy model",
+    "mapAdd": "Add {{name}}",
+    "mapAddByJson": "Add {{name}} through JSON",
+    "mapJsonInput": "JSON input",
+    "listJsonError": "JSON format error, please make sure the input is in array format.",
+    "listJsonHelperText": "Please enter the JSON array format, for example: [\"item1\", \"item2\", \"item3\"]",
+    "modelsFetched": "Models fetched successfully",
+    "selectedMappingCount": "Selected {{count}} model mappings",
+    "addMapping": "Add model mapping",
+    "addToModelMapping": "Add to model mapping",
+    "modelMapping": "Model mapping",
+    "modelMappingSettings": "Model mapping settings",
+    "prefixOrSuffix": "Prefix/Suffix",
+    "removePrefixHelp": "Enter the prefix you want to remove",
+    "removeSuffixHelp": "Enter the suffix you want to remove",
+    "addPlusSign": "Use mapping before billing",
+    "mappingPreview": "Mapping preview",
+    "removePrefix": "Remove prefix",
+    "removeSuffix": "Remove suffix",
+    "collapseList": "Collapse list",
+    "expandList": "Expand list",
+    "convertToLowercase": "Convert model names to lowercase",
+    "filterMappedModels": "Do not fill the model name before mapping.",
+    "overwriteModels": "Overwrite existing model list",
+    "overwriteModelsTip": "When enabled, the existing model list will be cleared and only the selected models will be preserved",
+    "overwriteMappings": "Overwrite existing mappings",
+    "overwriteMappingsTip": "When enabled, existing mappings will be cleared and only new mappings will be preserved",
+    "clearModels": "Reset",
+    "clearModelsTip": "Reset all selected models"
   },
   "channel_index": {
     "AzureApiVersion": "Azure version number",
@@ -146,6 +220,8 @@
     "auto": "automatic",
     "canModels": "Available models:",
     "channelWeb": "Official website",
+    "key": "Key",
+    "keyRequired": "Key is required",
     "clickUpdateQuota": "Click to update balance",
     "delChannel": "Delete channel",
     "delChannelCount": "Removed all disabled channels, {{count}} in total",
@@ -207,6 +283,7 @@
     "close": "closure",
     "copyUrl": "Copy address",
     "create": "create",
+    "currency": "USD",
     "delete": "delete",
     "deleteConfirm": "Delete {{title}}?",
     "disable": "disabled",
@@ -226,6 +303,7 @@
     "processing": "Processing...",
     "registerOk": "registration success!",
     "registerTip": "The verification code was sent successfully, please check your email!",
+    "reset": "Reset",
     "saveSuccess": "Saved successfully!",
     "serverError": "Server Error",
     "show": "show",
@@ -235,7 +313,13 @@
     "unknown": "unknown",
     "verificationCode": "Verification code",
     "deleteError": "Deletion failed: {{message}}",
-    "deleteSuccess": "Delete successful!"
+    "deleteSuccess": "Delete successful!",
+    "jsonFormatError": "JSON format error",
+    "actions": "Operation",
+    "noDataAvailable": "No data available",
+    "pageSize": "Number of items per page",
+    "search": "Search",
+    "total": "Total"
   },
   "dashboard": "Dashboard",
   "dashboard_index": {
@@ -251,7 +335,29 @@
     "today_requests": "Today's Requests",
     "today_tokens": "Today's Tokens",
     "unknown": "Unknown",
-    "used": "Used"
+    "used": "Used",
+    "week_model_statistics": "Week Model Statistics",
+    "week_consumption_log": "Week Consumption Log",
+    "week_total_consumption": "Week Total Consumption",
+    "7days_model_usage_pie": "7 Days Model Usage Pie",
+    "date": "Date",
+    "request_count": "Request Count",
+    "amount": "Amount",
+    "tokens": "Tokens(input/output)",
+    "cache_tokens": "CacheTokens",
+    "request_time": "Request Time(s)",
+    "loading": "Loading...",
+    "quickStart": "Quick Start",
+    "quickStartTip": "When you click the button below, the system will automatically create a sys_playground token",
+    "ComparedWithYesterday": "Compared with yesterday",
+    "usage": "Usage",
+    "RPM": "Current RPM",
+    "TPM": "Current TPM",
+    "total": "Total number",
+    "availability": "Availability",
+    "tab_status": "Status",
+    "tab_dashboard": "Dashboard",
+    "title": "Dashboard"
   },
   "description": "All-in-one OpenAI interface\nIntegrates various API access methods\nOne-click deployment, ready to use",
   "echo 映射": "echo mapping",
@@ -280,8 +386,45 @@
   },
   "jump": "Redirecting...",
   "log": "Log",
+  "invoice": "Monthly Bill",
+  "midjourney": "Midjourney",
+  "invoice_index": {
+    "invoice": "Monthly Bill",
+    "refresh": "Refresh",
+    "id": "ID",
+    "name": "Name",
+    "status": "Status",
+    "amount": "Amount",
+    "createdTime": "Created Time",
+    "paidTime": "Paid Time",
+    "actions": "Actions",
+    "deleteInvoice": "Delete Invoice",
+    "confirmDeleteInvoice": "Are you sure you want to delete this invoice",
+    "close": "Close",
+    "delete": "Delete",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "date": "Billing Time",
+    "requestCount": "Total Requests",
+    "quota": "Consumption Amount",
+    "promptTokens": "Input Tokens",
+    "completionTokens": "Output Tokens",
+    "requestTime": "Request Time",
+    "tokens": "Tokens (Input/Output)",
+    "alert": "Monthly bill data is generated on the 1st of each month",
+    "viewInvoice": "View Invoice",
+    "modelName": "Model Name",
+    "option": "Option",
+    "username": "Username",
+    "email": "Email",
+    "userinfo": "User Information",
+    "usage_statistics": "Usage Statistics",
+    "download": "Download PDF",
+    "usage_details": "Invoice Details",
+    "summary": "Summary"
+  },
   "logPage": {
-    "cachedTokens": "Cache Tokens",
+    "cachedTokens": "Cache Tokens (* {{ ratio }})",
     "channelLabel": "Channel",
     "columnSettings": "Column Settings",
     "selectColumns": "Select Columns",
@@ -289,14 +432,14 @@
     "detailLabel": "Detail",
     "durationLabel": "Duration",
     "durationTooltip": "t/s: The number of output tokens divided by the total generation time, indicating the generation speed",
-    "groupLabel": "group",
-    "inputAudioTokens": "Input audio tokens",
+    "groupLabel": "Group",
+    "inputAudioTokens": "Input audio tokens (* {{ ratio }})",
     "inputLabel": "Input",
-    "inputTextTokens": "Input text tokens",
+    "inputTextTokens": "Input text tokens (* {{ ratio }})",
     "modelLabel": "Model",
-    "outputAudioTokens": "Output audio tokens",
+    "outputAudioTokens": "Output audio tokens (* {{ ratio }})",
     "outputLabel": "Output",
-    "outputTextTokens": "Output text tokens",
+    "outputTextTokens": "Output text tokens (* {{ ratio }})",
     "quotaLabel": "Quota",
     "refreshButton": "Refresh/Clear Search",
     "searchButton": "Search",
@@ -309,6 +452,14 @@
     "typeLabel": "Type",
     "userLabel": "User",
     "sourceIp": "Source IP",
+    "unknown": "Unknown",
+    "logType": {
+      "all": "All",
+      "recharge": "Recharge",
+      "consumption": "Consumption",
+      "management": "Management",
+      "system": "System"
+    },
     "content": {
       "calculate_steps": "Calculation steps:",
       "calculate_steps_tip": "PS: This system calculates based on points, and all amounts are converted from points. 1 point = $0.000002, with a minimum spending of 1 point. This calculation is for reference only; actual charges may vary.",
@@ -324,8 +475,25 @@
       "old_log": "old version log",
       "illustrate": "* This record is the log recorded before the system upgrade"
     },
-    "cachedReadTokens": "Cache read Tokens",
-    "cachedWriteTokens": "Write tokens to cache (* {{ ratio }})"
+    "quotaDetail": {
+      "saved": "Saved ",
+      "originalPrice": "Original Price",
+      "inputPrice": "Input Price",
+      "outputPrice": "Output Price",
+      "groupRatio": "Group Ratio",
+      "groupRatioValue": "Group Ratio",
+      "actualPrice": "Actual Price",
+      "input": "Input",
+      "output": "Output",
+      "finalCalculation": "Final Calculation",
+      "originalBilling": "Original Billing",
+      "actualBilling": "Actual Billing",
+      "calculationNote": "PS: This system calculates based on points, and all amounts are converted from points. 1 point = $0.000002, with a minimum spending of 1 point. This calculation is for reference only; actual charges may vary.",
+      "times": "times"
+    },
+    "cachedReadTokens": "Cache read Tokens (* {{ ratio }})",
+    "cachedWriteTokens": "Write tokens to cache (* {{ ratio }})",
+    "reasoningTokens": "Deduction Tokens (* {{ ratio }})"
   },
   "login": {
     "codeRequired": "verification code must be filled",
@@ -349,17 +517,6 @@
     "usernameRequired": "Username/Email is required",
     "wechatLoginInfo": "Please use WeChat to scan the QR code to follow the official account and enter the \"verification code\" to obtain the verification code (valid within three minutes)",
     "wechatVerificationCodeLogin": "WeChat verification code login"
-  },
-  "menu": {
-    "about": "About",
-    "console": "Console",
-    "error": "Error",
-    "home": "Home",
-    "login": "Login",
-    "signout": "Signout",
-    "signup": "Signup",
-    "unknownVersion": "Unknown Version",
-    "welcomeBack": "Welcome Back"
   },
   "midjourneyPage": {
     "channel": "Channel",
@@ -392,10 +549,28 @@
     "times": "times",
     "tokens": "tokens",
     "type": "Type",
-    "inputAudioTokensRatio": "Audio input ratio",
+    "input_audio_tokens": "Audio input ratio",
     "other": "Other",
-    "outputAudioTokensRatio": "Audio output ratio",
-    "rate": "Rate"
+    "output_audio_tokens": "Audio output ratio",
+    "rate": "Rate",
+    "RPM": "API rate",
+    "free": "Free",
+    "cached_tokens": "Cache Ratio",
+    "cached_write_tokens": "Cache write ratio",
+    "cached_read_tokens": "Cache Read Ratio",
+    "reasoning_tokens": "Reasoning Ratio",
+    "input_text_tokens": "Input text Ratio",
+    "output_text_tokens": "Output text Ratio",
+    "all": "All",
+    "extraRatios": "Expand price",
+    "input": "Input",
+    "input_image_tokens": "Enter image magnification",
+    "noExtraRatios": "No additional charge",
+    "output": "output",
+    "output_image_tokens": "Output image magnification",
+    "price": "Price",
+    "showAll": "Show all",
+    "onlyAvailable": "Only show available"
   },
   "nova 映射": "nova mapping",
   "onyx 映射": "onyx mapping",
@@ -499,7 +674,8 @@
     "noPriceModelWarning": "There are models without configured prices, please configure the prices in time:",
     "refreshButton": "Refresh",
     "singleOperation": "Single Operation",
-    "updatePricesButton": "Update Prices"
+    "updatePricesButton": "Update Prices",
+    "title": "Model price"
   },
   "pricing_edit": {
     "channelType": "Channel type",
@@ -524,7 +700,18 @@
     "saveOk": "Saved successfully",
     "type": "type",
     "typeCheck": "The type can only be tokens or times",
-    "typeErr": "type error"
+    "typeErr": "type error",
+    "locked_title": "Lock price",
+    "locked": "Locked price",
+    "unlocked": "Unlocked price",
+    "lockedTip": "Price locked cannot be overridden by price updates on the server or program",
+    "completionRatio": "Completion ratio",
+    "delMultipleInfoTip": "Are you sure you want to delete the selected {{count}} prices?",
+    "extraRatios": "Extra expansion factor",
+    "noAvailableRatios": "No available extension ratio",
+    "noExtraRatios": "No additional magnification rate is available, please select to add from the drop-down menu.",
+    "promptRatio": "Leverage ratio",
+    "selectExtraRatio": "Select magnification ratio"
   },
   "profile": "Profile",
   "profilePage": {
@@ -737,15 +924,38 @@
         "title": "Rate Settings"
       },
       "title": "Operation Settings",
-      "audioTokenSettings": {
-        "info": "Configure audio rates. The configuration format is JSON, with keys as model names and values as input-output token rates. For example: {\"gpt-4o-audio-preview\": {\"input_audio_tokens_ratio\": 40, \"output_audio_tokens_ratio\": 20}, \"gpt-4o-mini-audio-preview\": {\"input_audio_tokens_ratio\": 67, \"output_audio_tokens_ratio\": 34}}",
-        "save": "Save audio token settings",
-        "title": "Audio token settings"
+      "extraTokenPriceJson": {
+        "info": "Configure extra token prices. The configuration format is JSON, with keys as model names and values as input-output token prices. For example: {\"gpt-4o-audio-preview\": {\"input_audio_tokens_ratio\": 40, \"output_audio_tokens_ratio\": 20}, \"gpt-4o-mini-audio-preview\": {\"input_audio_tokens_ratio\": 67, \"output_audio_tokens_ratio\": 34}}",
+        "save": "Save extra token price settings",
+        "title": "Extra token price settings"
       },
       "disableChannelKeywordsSettings": {
         "info": "Disable channel keywords, one keyword per line.",
         "save": "Save disabled channel keyword settings",
         "title": "Disable channel keyword settings"
+      },
+      "safetySettings": {
+        "title": "System Safety Settings",
+        "enableSafe": "Enable Prompt Safety Check",
+        "safeToolName": {
+          "label": "Safe Check Tool"
+        },
+        "safeKeyWords": {
+          "label": "Keyword List",
+          "placeholder": "Enter keywords, one per line"
+        },
+        "save": "Save Settings"
+      },
+      "claudeSettings": {
+        "budgetTokensPercentage": {
+          "label": "Default thinking token percentage",
+          "placeholder": "Please enter the default thinking token percentage."
+        },
+        "defaultMaxTokens": {
+          "label": "Default MaxToken quantity",
+          "placeholder": "Please enter the default MaxToken quantity in JSON format, where \"default\" represents the default value. For example: {\"default\": 1000, \"claude-3-7-sonnet-latest\": 128000}"
+        },
+        "save": "Save Claude's settings"
       }
     },
     "otherSettings": {
@@ -928,7 +1138,8 @@
     "task": "Task ID",
     "time": "time consuming",
     "type": "type",
-    "user": "user"
+    "user": "user",
+    "title": "Asynchronous task"
   },
   "telegramPage": {
     "action": "Action",
@@ -991,7 +1202,11 @@
     "usedQuota": "Used Quota",
     "userGroup": "group",
     "apiRate": "",
-    "apiRateTip": ""
+    "apiRateTip": "",
+    "heartbeat": "Heartbeat setting (Experimental)",
+    "heartbeatTip": "Heartbeat setting means that when you make a stream request, if there is no response for a long time, your client may disconnect due to the timeout mechanism. To prevent this, you can enable the heartbeat setting. When the request exceeds the start time you set and there is no response, we will send a heartbeat request every 5 seconds to keep the connection. Note: If you are using a relay program, please do not enable this setting, it may cause unexpected issues.",
+    "heartbeatTimeout": "Heartbeat start time (unit: seconds)",
+    "heartbeatTimeoutHelperText": "Minimum value: 30 seconds, maximum value: 90 seconds"
   },
   "topup": "Top-up",
   "topupCard": {
@@ -1037,6 +1252,12 @@
     "name": "Name",
     "nameTip": "Name for users",
     "public": "Is it public?",
+    "promotion": "Auto Upgrade",
+    "promotionTip": "When enabled, users will automatically upgrade to this group when their recharge amount meets the min-max conditions.",
+    "min": "Min Amount",
+    "minTip": "Minimum recharge amount required for auto upgrade.",
+    "max": "Max Amount",
+    "maxTip": "Maximum recharge amount for this group level.",
     "ratio": "magnification",
     "symbol": "Identification",
     "symbolTip": "The label is used to distinguish user groups, please use English and do not repeat.",
@@ -1188,5 +1409,80 @@
   },
   "单独设置代理地址，支持http和socks5，例如：http://127[0][0]": {
     "1:1080,代理地址中可以通过 `%s` 作为会话标识占位符，程序中检测到有占位符会根据Key生成唯一会话标识符进行替换": "Set the proxy address separately, supporting both http and socks5, for example: http://127.0.0.1:1080. You can use `%s` as a session identifier placeholder in the proxy address. When a placeholder is detected in the program, it will be replaced with a unique session identifier generated based on the Key."
-  }
+  },
+  "请输入版本号，例如：v3[__i18n_ally_root__]": {
+    "1": "",
+    "__i18n_ally_root__": {
+      "1": ""
+    }
+  },
+  "请选择该渠道所支持的模型,你也可以输入通配符*来匹配模型，例如：gpt-3": {
+    "__i18n_ally_root__": {
+      "5*，表示支持所有gpt-3": {
+        "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+          "5*是正确的，*gpt-3": {
+            "5是错误的": ""
+          }
+        }
+      },
+      "__i18n_ally_root__": {
+        "__i18n_ally_root__": {
+          "5*，表示支持所有gpt-3": {
+            "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+              "5*是正确的，*gpt-3": {
+                "5是错误的": ""
+              }
+            }
+          },
+          "__i18n_ally_root__": {
+            "__i18n_ally_root__": {
+              "5*，表示支持所有gpt-3": {
+                "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+                  "5*是正确的，*gpt-3": {
+                    "5是错误的": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "输入后，会替换请求地址中的v1，例如：freeapi，则请求chat时会变成https://xxx": {
+    "__i18n_ally_root__": {
+      "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": "",
+      "__i18n_ally_root__": {
+        "__i18n_ally_root__": {
+          "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": "",
+          "__i18n_ally_root__": {
+            "__i18n_ally_root__": {
+              "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "用于测试使用的模型，为空时无法测速,如：gpt-3": {
+    "__i18n_ally_root__": {
+      "5-turbo，仅支持chat模型": ""
+    }
+  },
+  "禁用流式的模型": "Disable the streaming model",
+  "请参考wiki中的文档获取key": {
+    "__i18n_ally_root__": {
+      " https://github": {
+        "com/MartialBE/one-hub/wiki/VertexAI": ""
+      }
+    }
+  },
+  "请输入你部署的Ollama地址，例如：http://127[__i18n_ally_root__]": {
+    "0": {
+      "0": {
+        "1:11434，如果你使用了cloudflare Zero Trust，可以在下方插件填入授权信息": ""
+      }
+    }
+  },
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "Fill in here to disable the streaming model. Note: If you fill in to disable the streaming model, these models will be skipped for streaming requests on that channel."
 }

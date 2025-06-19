@@ -47,6 +47,7 @@ type ChatCompletionMessage struct {
 	Content          any                              `json:"content,omitempty"`
 	Refusal          string                           `json:"refusal,omitempty"`
 	ReasoningContent string                           `json:"reasoning_content,omitempty"`
+	Reasoning        string                           `json:"reasoning,omitempty"`
 	Name             *string                          `json:"name,omitempty"`
 	FunctionCall     *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
 	ToolCalls        []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
@@ -175,6 +176,13 @@ type ChatMessagePart struct {
 	ImageURL   *ChatMessageImageURL `json:"image_url,omitempty"`
 	InputAudio any                  `json:"input_audio,omitempty"`
 	Refusal    string               `json:"refusal,omitempty"`
+
+	File *ChatMessageFile `json:"file,omitempty"`
+}
+
+type ChatMessageFile struct {
+	Filename string `json:"filename,omitempty"`
+	FileData string `json:"file_data,omitempty"`
 }
 
 type ChatCompletionResponseFormat struct {
@@ -218,10 +226,21 @@ type ChatCompletionRequest struct {
 	Audio               *ChatAudio                    `json:"audio,omitempty"`
 	ReasoningEffort     *string                       `json:"reasoning_effort,omitempty"`
 	Prediction          any                           `json:"prediction,omitempty"`
+	WebSearchOptions    *WebSearchOptions             `json:"web_search_options,omitempty"`
 
-	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+	Reasoning *ChatReasoning `json:"reasoning,omitempty"`
+
+	// 考虑到后续一些模型逐步采用openai api格式扩展参数的方式进行服务提供，所以考虑把一些模型的特有参数放入可选参数
+	EnableThinking *bool `json:"enable_thinking,omitempty"` // qwen3 思考开关
+	ThinkingBudget *int  `json:"thinking_budget,omitempty"` // qwen3 思考长度，只有enable_thinking开启才生效
+	EnableSearch   *bool `json:"enable_search,omitempty"`   // qwen 搜索开关
 
 	OneOtherArg string `json:"-"`
+}
+
+type ChatReasoning struct {
+	MaxTokens int    `json:"max_tokens,omitempty"`
+	Effort    string `json:"effort,omitempty"`
 }
 
 type WebSearchOptions struct {
@@ -401,6 +420,7 @@ type ChatCompletionStreamChoiceDelta struct {
 	FunctionCall     *ChatCompletionToolCallsFunction `json:"function_call,omitempty"`
 	ToolCalls        []*ChatCompletionToolCalls       `json:"tool_calls,omitempty"`
 	ReasoningContent string                           `json:"reasoning_content,omitempty"`
+	Reasoning        string                           `json:"reasoning,omitempty"`
 	Image            []MultimediaData                 `json:"image,omitempty"`
 }
 

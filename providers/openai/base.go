@@ -22,6 +22,7 @@ type OpenAIProvider struct {
 	BalanceAction        bool
 	SupportStreamOptions bool
 	StreamEscapeJSON     bool
+	ReasoningHandler     bool
 }
 
 // 创建 OpenAIProvider
@@ -129,7 +130,7 @@ func (p *OpenAIProvider) GetFullRequestURL(requestURL string, modelName string) 
 		apiVersion := p.Channel.Other
 		if modelName != "" {
 			// 检测模型是是否包含 . 如果有则直接去掉
-			modelName = strings.Replace(modelName, ".", "", -1)
+			// modelName = strings.Replace(modelName, ".", "", -1)
 
 			if modelName == "dall-e-2" {
 				// 因为dall-e-3需要api-version=2023-12-01-preview，但是该版本
@@ -174,6 +175,66 @@ func (p *OpenAIProvider) GetRequestHeaders() (headers map[string]string) {
 	return headers
 }
 
+// mergeCustomParams 将自定义参数合并到请求体中
+func (p *OpenAIProvider) mergeCustomParams(requestMap map[string]interface{}, customParams map[string]interface{}) map[string]interface{} {
+	// 检查是否需要覆盖已有参数
+	shouldOverwrite := false
+	if overwriteValue, exists := customParams["overwrite"]; exists {
+		if boolValue, ok := overwriteValue.(bool); ok {
+			shouldOverwrite = boolValue
+		}
+	}
+
+	// 如果配置是pre_add，而不是发送阶段，则此处跳过所有处理
+	if preAdd, exists := customParams["pre_add"]; exists && preAdd == true {
+		return requestMap
+	}
+
+	// 检查是否按照模型粒度控制
+	perModel := false
+	if perModelValue, exists := customParams["per_model"]; exists {
+		if boolValue, ok := perModelValue.(bool); ok {
+			perModel = boolValue
+		}
+	}
+
+	customParamsModel := customParams
+	if perModel {
+		if modelValue, ok := requestMap["model"].(string); ok {
+			if v, exists := customParams[modelValue]; exists {
+				if modelConfig, ok := v.(map[string]interface{}); ok {
+					customParamsModel = modelConfig
+				} else {
+					customParamsModel = map[string]interface{}{}
+				}
+			} else {
+				customParamsModel = map[string]interface{}{}
+			}
+		}
+	}
+
+	// 添加额外参数
+	for key, value := range customParamsModel {
+		// 忽略 keys "stream", "overwrite", and "per_model"
+		if key == "stream" || key == "overwrite" || key == "per_model" || key == "pre_add" {
+			continue
+		}
+		// 根据覆盖设置决定如何添加参数
+		if shouldOverwrite {
+			// 覆盖模式：直接添加/覆盖参数
+			requestMap[key] = value
+		} else {
+			// 非覆盖模式：仅当参数不存在时添加
+			if _, exists := requestMap[key]; !exists {
+				requestMap[key] = value
+			}
+		}
+	}
+
+	return requestMap
+}
+
+// 修改GetRequestTextBody函数中的对应部分
 func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, request any) (*http.Request, *types.OpenAIErrorWithStatusCode) {
 	url, errWithCode := p.GetSupportedAPIUri(relayMode)
 	if errWithCode != nil {
@@ -184,7 +245,39 @@ func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, req
 
 	// 获取请求头
 	headers := p.GetRequestHeaders()
-	// 创建请求
+
+	// 处理额外参数
+	customParams, err := p.CustomParameterHandler()
+	if err != nil {
+		return nil, common.ErrorWrapper(err, "custom_parameter_error", http.StatusInternalServerError)
+	}
+	// 如果有额外参数，将其添加到请求体中
+	if customParams != nil {
+		// 将请求体转换为map，以便添加额外参数
+		var requestMap map[string]interface{}
+		requestBytes, err := json.Marshal(request)
+		if err != nil {
+			return nil, common.ErrorWrapper(err, "marshal_request_failed", http.StatusInternalServerError)
+		}
+
+		err = json.Unmarshal(requestBytes, &requestMap)
+		if err != nil {
+			return nil, common.ErrorWrapper(err, "unmarshal_request_failed", http.StatusInternalServerError)
+		}
+
+		// 处理自定义额外参数
+		requestMap = p.mergeCustomParams(requestMap, customParams)
+
+		// 使用修改后的请求体创建请求
+		req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(requestMap), p.Requester.WithHeader(headers))
+		if err != nil {
+			return nil, common.ErrorWrapper(err, "new_request_failed", http.StatusInternalServerError)
+		}
+
+		return req, nil
+	}
+
+	// 如果没有额外参数，使用原始请求体创建请求
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(request), p.Requester.WithHeader(headers))
 	if err != nil {
 		return nil, common.ErrorWrapper(err, "new_request_failed", http.StatusInternalServerError)

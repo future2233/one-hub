@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"net/http"
 	"one-api/cli"
 	"one-api/common"
 	"one-api/common/cache"
@@ -21,6 +22,7 @@ import (
 	"one-api/model"
 	"one-api/relay/task"
 	"one-api/router"
+	"one-api/safty"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -78,7 +80,13 @@ func main() {
 	cron.InitCron()
 	storage.InitStorage()
 	search.InitSearcher()
-
+	// 初始化安全检查器
+	safty.InitSaftyTools()
+	// 初始化账单数据
+	if config.UserInvoiceMonth {
+		logger.SysLog("Enable User Invoice Monthly Data")
+		go model.InsertStatisticsMonth()
+	}
 	initHttpServer()
 }
 
@@ -121,6 +129,13 @@ func initHttpServer() {
 	}
 
 	store := cookie.NewStore([]byte(config.SessionSecret))
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   2592000, // 30 days
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+	})
 	server.Use(sessions.Sessions("session", store))
 
 	router.SetRouter(server, buildFS, indexPage)

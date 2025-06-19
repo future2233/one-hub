@@ -1,20 +1,23 @@
 package relay
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
+	"net/http"
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/image"
 	"one-api/common/requester"
 	"one-api/providers/gemini"
+	"one-api/safty"
 	"one-api/types"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-var AllowGeminiChannelType = []int{config.ChannelTypeGemini}
+var AllowGeminiChannelType = []int{config.ChannelTypeGemini, config.ChannelTypeVertexAI}
 
 type relayGeminiOnly struct {
 	relayBase
@@ -23,8 +26,12 @@ type relayGeminiOnly struct {
 
 func NewRelayGeminiOnly(c *gin.Context) *relayGeminiOnly {
 	c.Set("allow_channel_type", AllowGeminiChannelType)
-	relay := &relayGeminiOnly{}
-	relay.c = c
+	relay := &relayGeminiOnly{
+		relayBase: relayBase{
+			allowHeartbeat: true,
+			c:              c,
+		},
+	}
 
 	return relay
 }
@@ -77,6 +84,20 @@ func (r *relayGeminiOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 		return nil, false
 	}
 
+	// 内容审查
+	if config.EnableSafe {
+		for _, message := range r.geminiRequest.Contents {
+			if message.Parts != nil {
+				CheckResult, _ := safty.CheckContent(message.Parts)
+				if !CheckResult.IsSafe {
+					err = common.StringErrorWrapperLocal(CheckResult.Reason, CheckResult.Code, http.StatusBadRequest)
+					done = true
+					return
+				}
+			}
+		}
+	}
+
 	r.geminiRequest.Model = r.modelName
 
 	if r.geminiRequest.Stream {
@@ -84,6 +105,10 @@ func (r *relayGeminiOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 		response, err = chatProvider.CreateGeminiChatStream(r.geminiRequest)
 		if err != nil {
 			return
+		}
+
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
 		}
 
 		doneStr := func() string {
@@ -98,6 +123,10 @@ func (r *relayGeminiOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 			return
 		}
 
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
+		}
+
 		err = responseJsonClient(r.c, response)
 	}
 
@@ -108,12 +137,28 @@ func (r *relayGeminiOnly) send() (err *types.OpenAIErrorWithStatusCode, done boo
 	return
 }
 
-func (r *relayGeminiOnly) HandleError(err *types.OpenAIErrorWithStatusCode) {
+func (r *relayGeminiOnly) GetError(err *types.OpenAIErrorWithStatusCode) (int, any) {
 	newErr := FilterOpenAIErr(r.c, err)
 
 	geminiErr := gemini.OpenaiErrToGeminiErr(&newErr)
 
-	r.c.JSON(newErr.StatusCode, geminiErr.GeminiErrorResponse)
+	return newErr.StatusCode, geminiErr.GeminiErrorResponse
+}
+
+func (r *relayGeminiOnly) HandleJsonError(err *types.OpenAIErrorWithStatusCode) {
+	statusCode, response := r.GetError(err)
+	r.c.JSON(statusCode, response)
+}
+
+func (r *relayGeminiOnly) HandleStreamError(err *types.OpenAIErrorWithStatusCode) {
+	_, response := r.GetError(err)
+
+	str, jsonErr := json.Marshal(response)
+	if jsonErr != nil {
+		return
+	}
+	r.c.Writer.Write([]byte("data: " + string(str) + "\n\n"))
+	r.c.Writer.Flush()
 }
 
 func CountGeminiTokenMessages(request *gemini.GeminiChatRequest, preCostType int) (int, error) {
@@ -125,27 +170,35 @@ func CountGeminiTokenMessages(request *gemini.GeminiChatRequest, preCostType int
 
 	tokenNum := 0
 	tokensPerMessage := 4
+	var textMsg strings.Builder
 
 	for _, message := range request.Contents {
 		tokenNum += tokensPerMessage
 		for _, part := range message.Parts {
 			if part.Text != "" {
-				tokenNum += common.GetTokenNum(tokenEncoder, part.Text)
+				textMsg.WriteString(part.Text)
 			}
 
 			if part.InlineData != nil {
-				if preCostType == config.PreCostNotImage {
-					continue
+				if strings.HasPrefix(part.InlineData.MimeType, "image") {
+					if preCostType == config.PreCostNotImage {
+						continue
+					}
+					width, height, err := image.GetImageSizeFromBase64(part.InlineData.Data)
+					if err != nil {
+						return 0, err
+					}
+					tokenNum += int(math.Ceil((float64(width) * float64(height)) / 750))
+				} else {
+					// 其他类型的，暂时按200个token计算
+					tokenNum += 200
 				}
-
-				width, height, err := image.GetImageSizeFromBase64(part.InlineData.Data)
-				if err != nil {
-					return 0, err
-				}
-				tokenNum += int(math.Ceil((float64(width) * float64(height)) / 750))
 			}
 		}
 	}
 
+	if textMsg.Len() > 0 {
+		tokenNum += common.GetTokenNum(tokenEncoder, textMsg.String())
+	}
 	return tokenNum, nil
 }

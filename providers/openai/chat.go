@@ -9,6 +9,7 @@ import (
 	"one-api/common/config"
 	"one-api/common/requester"
 	"one-api/types"
+	"regexp"
 	"strings"
 )
 
@@ -17,6 +18,9 @@ type OpenAIStreamHandler struct {
 	ModelName  string
 	isAzure    bool
 	EscapeJSON bool
+
+	ReasoningHandler bool
+	ExtraBilling     map[string]types.ExtraBilling `json:"-"`
 }
 
 func (p *OpenAIProvider) CreateChatCompletion(request *types.ChatCompletionRequest) (openaiResponse *types.ChatCompletionResponse, errWithCode *types.OpenAIErrorWithStatusCode) {
@@ -58,6 +62,8 @@ func (p *OpenAIProvider) CreateChatCompletion(request *types.ChatCompletionReque
 
 	*p.Usage = *response.Usage
 
+	p.Usage.ExtraBilling = getChatExtraBilling(request)
+
 	return &response.ChatCompletionResponse, nil
 }
 
@@ -93,9 +99,11 @@ func (p *OpenAIProvider) CreateChatCompletionStream(request *types.ChatCompletio
 		ModelName:  request.Model,
 		isAzure:    p.IsAzure,
 		EscapeJSON: p.StreamEscapeJSON,
+
+		ExtraBilling: getChatExtraBilling(request),
 	}
 
-	return requester.RequestStream[string](p.Requester, resp, chatHandler.HandlerChatStream)
+	return requester.RequestStream(p.Requester, resp, chatHandler.HandlerChatStream)
 }
 
 func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan string, errChan chan error) {
@@ -132,6 +140,10 @@ func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan s
 	if openaiResponse.Usage != nil {
 		if openaiResponse.Usage.CompletionTokens > 0 {
 			*h.Usage = *openaiResponse.Usage
+
+			if h.ExtraBilling != nil {
+				h.Usage.ExtraBilling = h.ExtraBilling
+			}
 		}
 
 		if len(openaiResponse.Choices) == 0 {
@@ -142,15 +154,27 @@ func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan s
 		if len(openaiResponse.Choices) > 0 && openaiResponse.Choices[0].Usage != nil {
 			if openaiResponse.Choices[0].Usage.CompletionTokens > 0 {
 				*h.Usage = *openaiResponse.Choices[0].Usage
+				if h.ExtraBilling != nil {
+					h.Usage.ExtraBilling = h.ExtraBilling
+				}
 			}
 		} else {
 			if h.Usage.TotalTokens == 0 {
 				h.Usage.TotalTokens = h.Usage.PromptTokens
 			}
-			countTokenText := common.CountTokenText(openaiResponse.GetResponseText(), h.ModelName)
-			h.Usage.CompletionTokens += countTokenText
-			h.Usage.TotalTokens += countTokenText
+			h.Usage.TextBuilder.WriteString(openaiResponse.GetResponseText())
 		}
+	}
+
+	if h.ReasoningHandler && len(openaiResponse.Choices) > 0 {
+		for index, choices := range openaiResponse.Choices {
+			if choices.Delta.ReasoningContent == "" && choices.Delta.Reasoning != "" {
+				openaiResponse.Choices[index].Delta.ReasoningContent = choices.Delta.Reasoning
+				openaiResponse.Choices[index].Delta.Reasoning = ""
+			}
+		}
+
+		h.EscapeJSON = true
 	}
 
 	if h.EscapeJSON {
@@ -163,7 +187,8 @@ func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan s
 }
 
 func otherProcessing(request *types.ChatCompletionRequest, otherArg string) {
-	if (strings.HasPrefix(request.Model, "o1") || strings.HasPrefix(request.Model, "o3")) && request.MaxTokens > 0 {
+	matched, _ := regexp.MatchString(`^o[1-9]`, request.Model)
+	if matched && request.MaxTokens > 0 {
 		request.MaxCompletionTokens = request.MaxTokens
 		request.MaxTokens = 0
 
@@ -173,5 +198,23 @@ func otherProcessing(request *types.ChatCompletionRequest, otherArg string) {
 				request.ReasoningEffort = &otherArg
 			}
 		}
+	}
+}
+
+func getChatExtraBilling(request *types.ChatCompletionRequest) map[string]types.ExtraBilling {
+	if !strings.Contains(request.Model, "search-preview") {
+		return nil
+	}
+
+	searchType := "medium"
+	if request.WebSearchOptions != nil && request.WebSearchOptions.SearchContextSize != "" {
+		searchType = request.WebSearchOptions.SearchContextSize
+	}
+
+	return map[string]types.ExtraBilling{
+		types.APITollTypeWebSearchPreview: {
+			Type:      searchType,
+			CallCount: 1,
+		},
 	}
 }

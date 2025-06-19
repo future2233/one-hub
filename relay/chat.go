@@ -7,9 +7,11 @@ import (
 	"math"
 	"net/http"
 	"one-api/common"
+	"one-api/common/config"
 	"one-api/common/requester"
 	"one-api/common/utils"
 	providersBase "one-api/providers/base"
+	"one-api/safty"
 	"one-api/types"
 	"time"
 
@@ -22,8 +24,12 @@ type relayChat struct {
 }
 
 func NewRelayChat(c *gin.Context) *relayChat {
-	relay := &relayChat{}
-	relay.c = c
+	relay := &relayChat{
+		relayBase: relayBase{
+			allowHeartbeat: true,
+			c:              c,
+		},
+	}
 	return relay
 }
 
@@ -40,8 +46,8 @@ func (r *relayChat) setRequest() error {
 		r.c.Set("skip_only_chat", true)
 	}
 
-	if !r.chatRequest.Stream && r.chatRequest.StreamOptions != nil {
-		return errors.New("the 'stream_options' parameter is only allowed when 'stream' is enabled")
+	if !r.chatRequest.Stream {
+		r.chatRequest.StreamOptions = nil
 	}
 
 	r.setOriginalModel(r.chatRequest.Model)
@@ -78,12 +84,29 @@ func (r *relayChat) send() (err *types.OpenAIErrorWithStatusCode, done bool) {
 	}
 
 	r.chatRequest.Model = r.modelName
+	// 内容审查
+	if config.EnableSafe {
+		for _, message := range r.chatRequest.Messages {
+			if message.Content != nil {
+				CheckResult, _ := safty.CheckContent(message.Content)
+				if !CheckResult.IsSafe {
+					err = common.StringErrorWrapperLocal(CheckResult.Reason, CheckResult.Code, http.StatusBadRequest)
+					done = true
+					return
+				}
+			}
+		}
+	}
 
 	if r.chatRequest.Stream {
 		var response requester.StreamReaderInterface[string]
 		response, err = chatProvider.CreateChatCompletionStream(&r.chatRequest)
 		if err != nil {
 			return
+		}
+
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
 		}
 
 		doneStr := func() string {
@@ -99,6 +122,11 @@ func (r *relayChat) send() (err *types.OpenAIErrorWithStatusCode, done bool) {
 		if err != nil {
 			return
 		}
+
+		if r.heartbeat != nil {
+			r.heartbeat.Stop()
+		}
+
 		err = responseJsonClient(r.c, response)
 
 	}

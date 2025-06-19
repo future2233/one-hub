@@ -1,4 +1,24 @@
 {
+  "systemInfo": "系統資訊",
+  "CPU Usage": "CPU 使用率",
+  "Memory Usage": "記憶體使用率",
+  "System Logs": "系統日誌",
+  "view_more_logs_on_server": "需要查看更多系統日誌請前往伺服器查看",
+  "Auto Refresh": "自動重新整理",
+  "Refresh Interval": "重新整理間隔",
+  "1 second": "1 秒",
+  "3 seconds": "3 秒",
+  "5 seconds": "5 秒",
+  "10 seconds": "10 秒",
+  "30 seconds": "30 秒",
+  "1 minute": "1 分鐘",
+  "Max Entries": "最大條數",
+  "Clear": "清空",
+  "No logs available": "暫無日誌",
+  "No matching logs found": "未找到匹配的日誌",
+  "Search logs...": "搜尋日誌...",
+  "invite_count": "邀請人數",
+  "invite_reward": "邀請獎勵",
   "AZURE_OPENAI_ENDPOINT": "AZURE_OPENAI_ENDPOINT",
   "CheckUpdatesTable": {
     "addNewOnly": "僅添加新增",
@@ -13,14 +33,30 @@
     "note": "注意",
     "operationCompleted": "操作成功完成！",
     "outputMultiplierChanged": "輸出倍率由",
-    "overwriteData": "覆蓋數據",
+    "updateModeAdd": "只新增",
+    "updateModeUpdate": "只更新",
+    "updateModeOverwrite": "覆蓋所有",
     "overwriteOrAddOnly": "你可以選擇覆蓋或者僅添加新增，如果你選擇覆蓋，將會刪除你自己添加的模型價格，完全使用遠程配置，如果你選擇僅添加新增，將只會添加新增模型的價格",
     "pleaseFetchData": "請先獲取數據",
     "priceChangeModels": "價格變動模型（僅供參考，如果你自己修改了對應模型的價格請忽略）",
     "to": "變為",
-    "url": "URL"
+    "url": "URL",
+    "priceServerTotal": "價格服務器總數",
+    "overwriteData": "",
+    "added": "新增",
+    "extraRatiosAdded": "新增擴展倍率",
+    "extraRatiosChanged": "擴展倍率變化",
+    "extraRatiosChanges": "擴展倍率變動",
+    "extraRatiosChangesTip": "擴展倍率變動：{{changes}}",
+    "extraRatiosRemoved": "刪除擴展倍率",
+    "modified": "修改",
+    "removed": "刪除"
   },
   "Header 配置": "Header 配置",
+  "sidebar": {
+    "totalQuota": "總額度",
+    "remainingBalance": "可用額度"
+  },
   "about": {
     "aboutDescription": "可在設置頁面設置關於內容，支持 HTML 和 Markdown",
     "aboutTitle": "關於",
@@ -90,7 +126,28 @@
     "validJson": "必須是有效的JSON字符串",
     "collapse": "收起",
     "expand": "展開",
-    "copyModels": "複製模型"
+    "copyModels": "複製模型",
+    "mapAdd": "新增{{name}}",
+    "mapAddByJson": "透過 JSON 添加{{name}}",
+    "mapJsonInput": "JSON 輸入",
+    "listJsonError": "JSON格式錯誤，請確保輸入的是陣列格式。",
+    "listJsonHelperText": "請輸入JSON數組格式，例如：[\"項目1\", \"項目2\", \"項目3\"]",
+    "otherModels": "其他模型",
+    "modelsFetched": "模型獲取成功",
+    "selectedMappingCount": "已選{{count}}個模型映射",
+    "addMapping": "添加模型映射",
+    "addToModelMapping": "添加到模型映射",
+    "modelMapping": "模型映射",
+    "modelMappingSettings": "模型映射設置",
+    "prefixOrSuffix": "前缀/後缀",
+    "removePrefixHelp": "請輸入你要刪除的前缀",
+    "removeSuffixHelp": "請輸入你要刪除的後缀",
+    "addPlusSign": "使用映射前計費",
+    "mappingPreview": "映射預覽",
+    "removePrefix": "刪除前缀",
+    "removeSuffix": "刪除後缀",
+    "collapseList": "收起列表",
+    "expandList": "展開列表"
   },
   "channel_index": {
     "AzureApiVersion": "Azure 版本號",
@@ -198,7 +255,9 @@
     "tagChannelsError": "標籤渠道{{action}}失敗: {{message}}",
     "tagChannelsSuccess": "標籤渠道{{action}}成功",
     "weightUpdateError": "權重更新失敗: {{message}}",
-    "weightUpdateSuccess": "權重更新成功"
+    "weightUpdateSuccess": "權重更新成功",
+    "key": "密鑰",
+    "keyRequired": "請輸入密鑰"
   },
   "common": {
     "again": "重試 ({{count}})",
@@ -236,7 +295,13 @@
     "unknown": "未知",
     "verificationCode": "驗證碼",
     "deleteError": "刪除失敗：{{message}}",
-    "deleteSuccess": "刪除成功！"
+    "deleteSuccess": "刪除成功！",
+    "jsonFormatError": "JSON 格式錯誤",
+    "actions": "操作",
+    "noDataAvailable": "冇數據可用",
+    "pageSize": "每頁條數",
+    "search": "搜尋",
+    "total": "總數"
   },
   "dashboard": "儀表板",
   "dashboard_index": {
@@ -252,7 +317,28 @@
     "today_requests": "今日請求",
     "today_tokens": "今日Token",
     "unknown": "未知",
-    "used": "已使用"
+    "used": "已使用",
+    "week_model_statistics": "近七日模型統計",
+    "week_consumption_log": "近七日消費日志",
+    "7days_model_usage_pie": "近七日模型使用情況",
+    "date": "日期",
+    "request_count": "請求次數",
+    "amount": "金額",
+    "tokens": "Tokens(輸入/輸出)",
+    "cache_tokens": "CacheTokens",
+    "request_time": "請求時間(s)",
+    "loading": "加載中...",
+    "quickStart": "快速開始",
+    "quickStartTip": "當您點擊下面按鈕時，系統會自動創建一個sys_playground的令牌",
+    "ComparedWithYesterday": "相比昨日",
+    "usage": "使用率",
+    "RPM": "當前RPM",
+    "TPM": "當前TPM",
+    "total": "總次數",
+    "availability": "可用率",
+    "tab_status": "狀態",
+    "tab_dashboard": "儀表板",
+    "title": "儀表板"
   },
   "description": "一站式的 OpenAI 接口\n整合各種 API 訪問方式\n一鍵部署，開箱即用",
   "echo 映射": "echo 映射",
@@ -280,9 +366,46 @@
     "inviteUrlLabel": "邀請連結"
   },
   "jump": "正在跳轉中...",
+  "invoice": "月度賬單",
+  "midjourney": "Midjourney",
+  "invoice_index": {
+    "invoice": "月度賬單",
+    "refresh": "刷新",
+    "id": "ID",
+    "name": "名稱",
+    "status": "狀態",
+    "amount": "金額",
+    "createdTime": "創建時間",
+    "paidTime": "支付時間",
+    "actions": "操作",
+    "deleteInvoice": "刪除賬單",
+    "confirmDeleteInvoice": "是否刪除賬單",
+    "close": "關閉",
+    "delete": "刪除",
+    "paid": "已支付",
+    "unpaid": "未支付",
+    "date": "賬單時間",
+    "requestCount": "請求總數",
+    "quota": "總金額",
+    "promptTokens": "輸入tokens",
+    "completionTokens": "輸出tokens",
+    "requestTime": "請求時長",
+    "tokens": "TOKEN(輸入/輸出)",
+    "alert": "每月1日凌晨生成上月賬單數據",
+    "viewInvoice": "查看賬單",
+    "modelName": "模型名稱",
+    "option": "操作",
+    "username": "用戶名",
+    "email": "郵箱",
+    "userinfo": "用戶信息",
+    "usage_statistics": "使用統計",
+    "download": "下載PDF",
+    "usage_details": "賬單詳情",
+    "summary": "摘要"
+  },
   "log": "日誌",
   "logPage": {
-    "cachedTokens": "緩存Tokens",
+    "cachedTokens": "緩存Tokens (* {{ ratio }})",
     "channelLabel": "渠道",
     "columnSettings": "列設置",
     "selectColumns": "選擇列",
@@ -291,13 +414,13 @@
     "durationLabel": "耗時",
     "durationTooltip": "t/s：輸出Token的數量除以總生成時間，表示生成速度",
     "groupLabel": "分組",
-    "inputAudioTokens": "輸入音頻Tokens",
+    "inputAudioTokens": "輸入音頻Tokens (* {{ ratio }})",
     "inputLabel": "輸入",
-    "inputTextTokens": "輸入文本Tokens",
+    "inputTextTokens": "輸入文本Tokens (* {{ ratio }})",
     "modelLabel": "模型",
-    "outputAudioTokens": "輸出音頻Tokens",
+    "outputAudioTokens": "輸出音頻Tokens (* {{ ratio }})",
     "outputLabel": "輸出",
-    "outputTextTokens": "輸出文本Tokens",
+    "outputTextTokens": "輸出文本Tokens (* {{ ratio }})",
     "quotaLabel": "額度",
     "refreshButton": "刷新/清除搜尋條件",
     "searchButton": "搜尋",
@@ -310,6 +433,13 @@
     "typeLabel": "類型",
     "userLabel": "用戶",
     "sourceIp": "Source IP",
+    "logType": {
+      "all": "全部",
+      "recharge": "充值",
+      "consumption": "消費",
+      "management": "管理",
+      "system": "系統"
+    },
     "content": {
       "calculate_steps": "計算步驟:",
       "calculate_steps_tip": "PS：本系統按照積分計算，所有金額均為積分換算而來，1積分=$0.000002，最低消費為1積分，本計算步驟僅供參考，以實際扣費為準。",
@@ -325,8 +455,25 @@
       "old_log": "舊版log",
       "illustrate": "* 本筆記錄為系統升級前所記錄的log"
     },
-    "cachedReadTokens": "緩存讀取Tokens",
-    "cachedWriteTokens": "緩存寫入 Tokens"
+    "quotaDetail": {
+      "saved": "節省 ",
+      "originalPrice": "原始價格",
+      "inputPrice": "輸入價格",
+      "outputPrice": "輸出價格",
+      "groupRatio": "分組倍率",
+      "groupRatioValue": "分組倍率",
+      "actualPrice": "實際價格",
+      "input": "輸入",
+      "output": "輸出",
+      "finalCalculation": "最終計算",
+      "originalBilling": "原始計費",
+      "actualBilling": "實際計費",
+      "calculationNote": "PS：本系統按照積分計算，所有金額均為積分換算而來，1積分=$0.000002，最低消費為1積分，本計算步驟僅供參考，以實際扣費為準。",
+      "times": "倍"
+    },
+    "cachedReadTokens": "緩存讀取Tokens (* {{ ratio }})",
+    "reasoningTokens": "推理Tokens (* {{ ratio }})",
+    "cachedWriteTokens": "緩存寫入 Tokens (* {{ ratio }})"
   },
   "login": {
     "codeRequired": "驗證碼不能為空",
@@ -393,10 +540,28 @@
     "times": "按次付費",
     "tokens": "按量付費",
     "type": "類型",
-    "inputAudioTokensRatio": "音頻輸入倍率",
+    "input_audio_tokens": "音頻輸入倍率",
     "other": "其他",
-    "outputAudioTokensRatio": "音頻輸出倍率",
-    "rate": "倍率"
+    "output_audio_tokens": "音頻輸出倍率",
+    "rate": "倍率",
+    "RPM": "API速率",
+    "free": "免費",
+    "cached_tokens": "快取倍率",
+    "cached_write_tokens": "快取寫入倍率",
+    "cached_read_tokens": "快取讀取倍率",
+    "reasoning_tokens": "推理倍率",
+    "input_text_tokens": "輸入文本倍率",
+    "output_text_tokens": "輸出文本倍率",
+    "all": "全部",
+    "extraRatios": "擴展價格",
+    "input": "輸入",
+    "input_image_tokens": "輸入圖片倍率",
+    "noExtraRatios": "冇擴展價格",
+    "output": "輸出",
+    "output_image_tokens": "輸出圖片倍率",
+    "price": "價格",
+    "showAll": "顯示所有",
+    "onlyAvailable": "只顯示可用"
   },
   "nova 映射": "nova 映射",
   "onyx 映射": "onyx 映射",
@@ -499,7 +664,8 @@
     "noPriceModelWarning": "存在未配置價格的模型，請及時配置價格：",
     "refreshButton": "刷新",
     "singleOperation": "單條操作",
-    "updatePricesButton": "更新價格"
+    "updatePricesButton": "更新價格",
+    "title": "模型價格"
   },
   "pricing_edit": {
     "channelType": "渠道類型",
@@ -524,7 +690,17 @@
     "saveOk": "保存成功",
     "type": "類型",
     "typeCheck": "類型只能是tokens或times",
-    "typeErr": "類型錯誤"
+    "typeErr": "類型錯誤",
+    "locked_title": "鎖定價格",
+    "locked": "鎖定價格",
+    "unlocked": "未鎖定價格",
+    "lockedTip": "價格鎖定後無法通過價格更新伺服器和程序覆蓋。如果您所配置的價格希望隨程序或價格伺服器同步更新，請勿鎖定",
+    "completionRatio": "完成倍率",
+    "delMultipleInfoTip": "確定刪除所選的 {{count}} 個價格嗎？",
+    "noAvailableRatios": "冇可用嘅擴展倍率",
+    "noExtraRatios": "暫無額外擴展倍率，請從下拉框選擇添加",
+    "promptRatio": "提示倍率",
+    "selectExtraRatio": "選擇擴展倍率"
   },
   "profile": "個人設定",
   "profilePage": {
@@ -737,15 +913,39 @@
         "title": "倍率設置"
       },
       "title": "運營設置",
-      "audioTokenSettings": {
-        "info": "配置音頻倍率。配置格式為JSON，鍵為模型名稱，值為輸入輸出Token倍率。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
-        "save": "保留音頻權杖設置",
-        "title": "音頻Token設置"
+      "extraTokenPriceJson": {
+        "info": "配置額外Token價格。配置格式為JSON，鍵為模型名稱，值為輸入輸出Token價格。例如：{\"gpt-4o-audio-preview\":{\"input_audio_tokens_ratio\":40,\"output_audio_tokens_ratio\":20},\"gpt-4o-mini-audio-preview\":{\"input_audio_tokens_ratio\":67,\"output_audio_tokens_ratio\":34}}",
+        "save": "保存額外Token價格設置",
+        "title": "額外Token價格設定"
       },
       "disableChannelKeywordsSettings": {
         "info": "配置停用通道關鍵字，每行一個關鍵字。",
         "save": "保留停用通道關鍵字設置",
         "title": "停用通道關鍵詞設置"
+      },
+      "safetySettings": {
+        "title": "系統安全設置",
+        "enableSafe": "開啟 Prompt 安全檢查",
+        "safeToolName": {
+          "label": "安全檢查工具"
+        },
+        "safeKeyWords": {
+          "label": "關鍵詞列表",
+          "placeholder": "請輸入關鍵詞，每行一個"
+        },
+        "save": "保存設置"
+      },
+      "claudeSettings": {
+        "budgetTokensPercentage": {
+          "label": "預設思考Token百分比",
+          "placeholder": "請輸入預設思考 Token 百分比"
+        },
+        "defaultMaxTokens": {
+          "label": "默認MaxToken數量",
+          "placeholder": "請輸入默認MaxToken數量，以json格式表示，default代表默認值，例如：{\"default\": 1000, \"claude-3-7-sonnet-latest\": 128000}"
+        },
+        "save": "保留Claude設置",
+        "title": "克勞德設置"
       }
     },
     "otherSettings": {
@@ -928,7 +1128,8 @@
     "task": "任務ID",
     "time": "耗時",
     "type": "類型",
-    "user": "用戶"
+    "user": "用戶",
+    "title": "非同步任務"
   },
   "telegramPage": {
     "action": "操作",
@@ -991,7 +1192,11 @@
     "usedQuota": "已用額度",
     "userGroup": "分組",
     "apiRate": "API速率",
-    "apiRateTip": "每分鐘允許的請求數,當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效"
+    "apiRateTip": "每分鐘允許的請求數,當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效",
+    "heartbeat": "心跳設置(實驗性)",
+    "heartbeatTip": "心跳設置是指當在請求時，如果長時間沒有返回數據，您的客戶端可能會因為超時機制而斷開連接。為了防止這種情況，您可以開啟心跳設置，當請求超出您設置的開始時間，且無響應時，我們將會每隔5秒發送一次心跳請求(非流式請求返回空行，流式返回::PING)，以保持連接。注意：如果您在使用中轉程序時，請不要開啟該設置，可能會出現不可預知的问题。",
+    "heartbeatTimeout": "心跳開始時間(單位：秒)",
+    "heartbeatTimeoutHelperText": "最小值為30秒，最大值為90秒"
   },
   "topup": "儲值",
   "topupCard": {
@@ -1035,6 +1240,12 @@
     "name": "名稱",
     "nameTip": "給用戶看的名稱",
     "public": "是否公開",
+    "promotion": "自動升級",
+    "promotionTip": "啟用後，用戶充值金額滿足最小-最大條件時將自動升級到此用戶組",
+    "min": "最小金額",
+    "minTip": "自動升級所需的最小充值金額",
+    "max": "最大金額",
+    "maxTip": "此用戶組級別的最大充值金額",
     "ratio": "倍率",
     "symbol": "標識",
     "symbolTip": "標識用於區分用戶組，請使用英文，不可重複",
@@ -1188,5 +1399,86 @@
   },
   "单独设置代理地址，支持http和socks5，例如：http://127[0][0]": {
     "1:1080,代理地址中可以通过 `%s` 作为会话标识占位符，程序中检测到有占位符会根据Key生成唯一会话标识符进行替换": "單獨設置代理地址，支持http和socks5，例如：http://127.0.0.1:1080,代理地址中可以通過 `%s` 作為會話標識佔位符，程式中檢測到有占位符會根據Key生成唯一會話標識符進行替換"
-  }
+  },
+  "用于测试使用的模型，为空时无法测速,如：gpt-3": {
+    "5-turbo，仅支持chat模型": "用於測試使用的模型，為空時無法測速，例如：gpt-3.5-turbo，僅支持chat模型",
+    "__i18n_ally_root__": {
+      "__i18n_ally_root__": {
+        "5-turbo，仅支持chat模型": ""
+      }
+    }
+  },
+  "请参考wiki中的文档获取key": {
+    " https://github": {
+      "com/MartialBE/one-hub/wiki/VertexAI": "請參考wiki中的文件獲取key。https://github.com/MartialBE/one-hub/wiki/VertexAI"
+    },
+    "__i18n_ally_root__": {
+      "__i18n_ally_root__": {
+        " https://github": {
+          "com/MartialBE/one-hub/wiki/VertexAI": ""
+        }
+      }
+    }
+  },
+  "请输入你部署的Ollama地址，例如：http://127": {
+    "0": {
+      "0": {
+        "1:11434，如果你使用了cloudflare Zero Trust，可以在下方插件填入授权信息": "請輸入您部署的Ollama地址，例如：http://127.0.0.1:11434，如果您使用了Cloudflare Zero Trust，可以在下方插件填入授權資訊"
+      }
+    }
+  },
+  "请输入版本号，例如：v3": {
+    "1": "請輸入版本號，例如：v3.1",
+    "__i18n_ally_root__": {
+      "__i18n_ally_root__": {
+        "1": ""
+      }
+    }
+  },
+  "请选择该渠道所支持的模型,你也可以输入通配符*来匹配模型，例如：gpt-3": {
+    "5*，表示支持所有gpt-3": {
+      "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+        "5*是正确的，*gpt-3": {
+          "5是错误的": "請選擇該渠道所支持的模型，你亦可以輸入通配符*來匹配模型，例如：gpt-3.5*，表示支持所有 gpt-3.5 開頭的模型，*號只能在最後一位使用，前面必須有字符，例如：gpt-3.5*是正確的，*gpt-3.5是錯誤的。"
+        }
+      }
+    },
+    "__i18n_ally_root__": {
+      "__i18n_ally_root__": {
+        "5*，表示支持所有gpt-3": {
+          "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+            "5*是正确的，*gpt-3": {
+              "5是错误的": ""
+            }
+          }
+        },
+        "__i18n_ally_root__": {
+          "__i18n_ally_root__": {
+            "5*，表示支持所有gpt-3": {
+              "5开头的模型，*号只能在最后一位使用，前面必须有字符，例如：gpt-3": {
+                "5*是正确的，*gpt-3": {
+                  "5是错误的": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "输入后，会替换请求地址中的v1，例如：freeapi，则请求chat时会变成https://xxx": {
+    "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": "輸入後，會替換請求地址中的v1，例如：freeapi，則請求chat時會變成https://xxx.com/freeapi/chat/completions。如果需要禁用版本號，請輸入 disable。",
+    "__i18n_ally_root__": {
+      "__i18n_ally_root__": {
+        "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": "",
+        "__i18n_ally_root__": {
+          "__i18n_ally_root__": {
+            "com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable": ""
+          }
+        }
+      }
+    }
+  },
+  "禁用流式的模型": "停用流動式的模型",
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "呢度填寫禁用流式嘅模型，注意：如果填寫咗禁用流式嘅模型，咁就會喺流式請求時跳過呢個渠道。"
 }

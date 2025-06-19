@@ -101,7 +101,7 @@ function GetLightOption() {
     heading: '#202939',
     paper: '#FFFFFF',
     backgroundDefault: '#F5F7FA',
-    background: '#F8FAFD',
+    background: '#F5F7FA',
     darkTextPrimary: '#3E4555',
     darkTextSecondary: '#6C7A92',
     textDark: '#252F40',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { showError, trims } from 'utils/common';
 
 import Table from '@mui/material/Table';
@@ -11,22 +11,24 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import { Button, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText } from '@mui/material';
+import { Button, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText, Tabs, Tab } from '@mui/material';
 import LogTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from './component/TableToolBar';
 import { API } from 'utils/api';
-import { isAdmin } from 'utils/common';
-import { ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS } from 'constants';
+import { useIsAdmin } from 'utils/common';
+import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
 import { Icon } from '@iconify/react';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { UserContext } from 'contexts/UserContext';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import { useSelector } from 'react-redux';
+import { useLogType } from './type/LogType';
 
 export default function Log() {
   const { t } = useTranslation();
+  const LogType = useLogType();
   const originalKeyword = {
     p: 0,
     username: '',
@@ -34,7 +36,7 @@ export default function Log() {
     model_name: '',
     start_timestamp: 0,
     end_timestamp: dayjs().unix() + 3600,
-    log_type: 0,
+    log_type: '0',
     channel_id: '',
     source_ip: ''
   };
@@ -42,18 +44,18 @@ export default function Log() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('desc');
   const [orderBy, setOrderBy] = useState('created_at');
-  const [rowsPerPage, setRowsPerPage] = useState(ITEMS_PER_PAGE);
+  const [rowsPerPage, setRowsPerPage] = useState(() => getPageSize('log'));
   const [listCount, setListCount] = useState(0);
   const [searching, setSearching] = useState(false);
   const [toolBarValue, setToolBarValue] = useState(originalKeyword);
   const [searchKeyword, setSearchKeyword] = useState(originalKeyword);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const { userGroup } = useContext(UserContext);
+  const { userGroup } = useSelector((state) => state.account);
   const theme = useTheme();
   const matchUpMd = useMediaQuery(theme.breakpoints.up('sm'));
 
   const [logs, setLogs] = useState([]);
-  const userIsAdmin = isAdmin();
+  const userIsAdmin = useIsAdmin();
 
   // 添加列显示设置相关状态
   const [columnVisibility, setColumnVisibility] = useState({
@@ -116,8 +118,10 @@ export default function Log() {
   };
 
   const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
     setPage(0);
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(newRowsPerPage);
+    savePageSize('log', newRowsPerPage);
   };
 
   const searchLogs = async () => {
@@ -127,6 +131,13 @@ export default function Log() {
 
   const handleToolBarValue = (event) => {
     setToolBarValue({ ...toolBarValue, [event.target.name]: event.target.value });
+  };
+
+  const handleTabsChange = async (event, newValue) => {
+    const updatedToolBarValue = { ...toolBarValue, log_type: newValue };
+    setToolBarValue(updatedToolBarValue);
+    setPage(0);
+    setSearchKeyword(updatedToolBarValue);
   };
 
   const fetchData = useCallback(
@@ -182,9 +193,33 @@ export default function Log() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">{t('logPage.title')}</Typography>
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('logPage.title')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Log
+          </Typography>
+        </Stack>
       </Stack>
       <Card>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={toolBarValue.log_type}
+            onChange={handleTabsChange}
+            aria-label="basic tabs example"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{
+              '& .MuiTabs-indicator': {
+                display: 'none'
+              }
+            }}
+          >
+            {Object.values(LogType).map((option) => {
+              return <Tab key={option.value} label={option.text} value={option.value} />;
+            })}
+          </Tabs>
+        </Box>
         <Box component="form" noValidate>
           <TableToolBar filterName={toolBarValue} handleFilterName={handleToolBarValue} userIsAdmin={userIsAdmin} />
         </Box>
@@ -197,7 +232,7 @@ export default function Log() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             {matchUpMd ? (
               <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
                 <Button onClick={handleRefresh} size="small" startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>

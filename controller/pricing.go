@@ -7,6 +7,8 @@ import (
 	"one-api/common"
 	"one-api/model"
 
+	"github.com/spf13/viper"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -170,7 +172,7 @@ func BatchDeletePrices(c *gin.Context) {
 }
 
 func SyncPricing(c *gin.Context) {
-	overwrite := c.DefaultQuery("overwrite", "false")
+	updateMode := c.DefaultQuery("updateMode", string(model.PriceUpdateModeSystem))
 
 	prices := make([]*model.Price, 0)
 	if err := c.ShouldBindJSON(&prices); err != nil {
@@ -183,7 +185,7 @@ func SyncPricing(c *gin.Context) {
 		return
 	}
 
-	err := model.PricingInstance.SyncPricing(prices, overwrite == "true")
+	err := model.PricingInstance.SyncPricing(prices, updateMode)
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
@@ -191,6 +193,15 @@ func SyncPricing(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
+		"message": "",
+	})
+}
+
+func GetUpdatePriceService(c *gin.Context) {
+	updatePriceService := viper.GetString("update_price_service")
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    updatePriceService,
 		"message": "",
 	})
 }

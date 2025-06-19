@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import AuthGuard from 'utils/route-guard/AuthGuard';
@@ -17,6 +18,7 @@ import { SET_MENU } from 'store/actions';
 
 // assets
 import { Icon } from '@iconify/react';
+import ProfileDrawer from './ProfileDrawer';
 
 // styles
 export const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
@@ -24,7 +26,7 @@ export const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open
   borderRadius: 0,
   backgroundColor: theme.palette.background.default,
   transition: theme.transitions.create(
-    'margin',
+    ['margin', 'width'],
     open
       ? {
           easing: theme.transitions.easing.easeOut,
@@ -55,7 +57,9 @@ export const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open
   },
   [theme.breakpoints.up('md')]: {
     marginLeft: open ? 0 : -(drawerWidth - 20),
-    width: `calc(100% - ${drawerWidth}px)`
+    width: open ? `calc(100% - ${drawerWidth}px)` : '100%',
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3)
   },
   [theme.breakpoints.down('md')]: {
     marginLeft: '0',
@@ -86,6 +90,17 @@ const MainLayout = () => {
     dispatch({ type: SET_MENU, opened: !leftDrawerOpened });
   };
 
+  // Profile drawer state
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+
+  const openProfileDrawer = () => {
+    setProfileDrawerOpen(true);
+  };
+
+  const closeProfileDrawer = () => {
+    setProfileDrawerOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -113,11 +128,12 @@ const MainLayout = () => {
             xs: matchDownMd && leftDrawerOpened ? 0 : theme.zIndex.drawer - 1,
             md: theme.zIndex.drawer + 1
           },
-          width: '100%'
+          width: '100%',
+          borderRadius: 0
         }}
       >
         <Toolbar sx={{ px: { xs: 1.5, sm: 2, md: 3 }, minHeight: '64px', height: '64px' }}>
-          <Header handleLeftDrawerToggle={handleLeftDrawerToggle} />
+          <Header handleLeftDrawerToggle={handleLeftDrawerToggle} toggleProfileDrawer={openProfileDrawer} />
         </Toolbar>
       </AppBar>
 
@@ -134,6 +150,9 @@ const MainLayout = () => {
           </AdminContainer>
         </AuthGuard>
       </Main>
+
+      {/* 用户信息抽屉 */}
+      <ProfileDrawer open={profileDrawerOpen} onClose={closeProfileDrawer} />
     </Box>
   );
 };

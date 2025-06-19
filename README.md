@@ -39,7 +39,8 @@ _本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开�
 
 **如果发现缺少新模型，请在`后台-模型价格-更新价格`中更新新增的模型**
 
-[演示网站](https://one-api-martialbe.vercel.app/)
+[演示网站](https://one-hub.xiao5.info/)
+[文档](https://one-hub-doc.vercel.app/)
 
 </div>
 
@@ -49,12 +50,35 @@ _本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开�
 
 ## 功能变化
 
-- 重构了claude的chat.go文件，实现了提示缓存 （当前支持system prompt，大于2000字符时，会自动缓存，或者自行填入中文符号、、符号后的内容会进行缓存）
+- 全新的 UI 界面
+- 新增用户仪表盘
+- 新增管理员分析数据统计界面
+- 重构了中转`供应商`模块
+- **增强Claude提示缓存**：重构了claude的chat.go文件，实现了智能提示缓存（支持system prompt，大于2500字符时会自动缓存，支持"、、"分隔符进行精确缓存控制）
+- 支持使用`Azure Speech`模拟`TTS`功能
+- 渠道可配置单独的 http/socks5 代理
+- 支持动态返回用户模型列表
+- 支持自定义测速模型
+- 日志增加请求耗时
+- 支持和优化非 OpenAI 模型的函数调用（支持的模型可以在 lobe-chat 直接使用）
+- 支持完成倍率自定义
+- 支持完整的分页和排序
+- 支持`Telegram bot`
+- 支持模型按次收费
+- 支持模型通配符
+- 支持使用配置文件启动程序
+- 支持模型价格更新
+- 支持自动获取供应商模型
+- 支持仅聊天，开启后如果有传入`function call`参数会跳过该渠道
+- 支持支付
+- 支持配置用户组 RPM
+- 支持`Prometheus`监控
+- 支持`Uptime Kuma`状态监控(通过环境变量或者配置文件开启)
+- 支持用户分组自动升级
+- 支持用户月度账单生成(通过环境变量或者配置文件开启)
+- 支持多策略(`覆盖更新`,`只更新现有价格`,`只新增价格`)模型价格自动更新(通过环境变量或者配置文件开启）
+- 支持`Gemini`、`Claude`格式API请求（详见[文档](https://one-hub-doc.vercel.app/)）
 - docker compose文件修改为本地代码构建，方便开发使用
-
-## 文档
-
-请查看[文档](https://github.com/MartialBE/one-hub/wiki)
 
 ## 当前支持的供应商
 
@@ -89,5 +113,5 @@ _本项目是基于[one-api](https://github.com/songquanpeng/one-api)二次开�
 
 ## 交流群
 
-<img src="https://github.com/MartialBE/one-hub/assets/42402987/9b608d39-70ae-4b2e-be49-09afab6bd536" width="300">
+<img src="https://github.com/user-attachments/assets/d1395dac-bc97-481d-af40-ac47e6a00158" width="300">
 

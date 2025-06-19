@@ -1,7 +1,6 @@
 package config
 
 import (
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,12 +25,12 @@ var ChatLinks = ""
 var QuotaPerUnit = 500 * 1000.0 // $0.002 / 1K tokens
 var DisplayInCurrencyEnabled = true
 
+// 是否开启用户月账单功能
+var UserInvoiceMonth = false
+
 // Any options with "Secret", "Token" in its key won't be return by GetOptions
 
 var SessionSecret = uuid.New().String()
-
-var OptionMap map[string]string
-var OptionMapRWMutex sync.RWMutex
 
 var ItemsPerPage = 10
 var MaxRecentItems = 100
@@ -45,6 +44,85 @@ var LarkAuthEnabled = false
 var TurnstileCheckEnabled = false
 var RegisterEnabled = true
 var OIDCAuthEnabled = false
+
+// 是否开启内容审查
+var EnableSafe = false
+
+// 默认使用系统自带关键词审查工具
+var SafeToolName = "Keyword"
+
+// 系统自带关键词审查默认字典
+var SafeKeyWords = []string{
+	"fuck",
+	"shit",
+	"bitch",
+	"pussy",
+	"cunt",
+	"dick",
+	"asshole",
+	"bastard",
+	"slut",
+	"whore",
+	"nigger",
+	"nigga",
+	"nazi",
+	"gay",
+	"lesbian",
+	"transgender",
+	"queer",
+	"homosexual",
+	"incest",
+	"rape",
+	"rapist",
+	"raped",
+	"raping",
+	"raped",
+	"raping",
+	"rapist",
+	"rape",
+	"sex",
+	"sexual",
+	"sexually",
+	"sexualize",
+	"sexualized",
+	"sexualizes",
+	"sexualizing",
+	"sexually",
+	"sex",
+	"porn",
+	"pornography",
+	"prostitute",
+	"prostitution",
+	"masturbate",
+	"masturbation",
+	"pedophile",
+	"pedophilia",
+	"hentai",
+	"explicit",
+	"obscene",
+	"obscenity",
+	"erotic",
+	"erotica",
+	"fetish",
+	"NSFW",
+	"nude",
+	"nudity",
+	"harassment",
+	"abuse",
+	"violent",
+	"violence",
+	"suicide",
+	"racist",
+	"racism",
+	"discrimination",
+	"hate",
+	"terrorism",
+	"terrorist",
+	"drugs",
+	"cocaine",
+	"heroin",
+	"methamphetamine",
+}
 
 // mj
 var MjNotifyEnabled = false
@@ -72,10 +150,9 @@ var SMTPAccount = ""
 var SMTPFrom = ""
 var SMTPToken = ""
 
-var AudioTokenJson = ""
-
 var ChatImageRequestProxy = ""
 
+var GitHubProxy = ""
 var GitHubClientId = ""
 var GitHubClientSecret = ""
 var GitHubOldIdCloseEnabled = false
@@ -123,6 +200,12 @@ var RequestInterval time.Duration
 
 var BatchUpdateEnabled = false
 var BatchUpdateInterval = 5
+
+var MCP_ENABLE = false
+
+var UPTIMEKUMA_ENABLE = false
+var UPTIMEKUMA_DOMAIN = ""
+var UPTIMEKUMA_STATUS_PAGE_NAME = ""
 
 // Gemini
 var GeminiAPIEnabled = true
@@ -179,13 +262,13 @@ const (
 	ChannelTypePaLM = 11
 	// ChannelTypeAPI2GPT        = 12
 	// ChannelTypeAIGC2D         = 13
-	ChannelTypeAnthropic = 14
-	ChannelTypeBaidu     = 15
-	ChannelTypeZhipu     = 16
-	ChannelTypeAli       = 17
-	ChannelTypeXunfei    = 18
-	ChannelType360       = 19
-	// ChannelTypeOpenRouter = 20
+	ChannelTypeAnthropic  = 14
+	ChannelTypeBaidu      = 15
+	ChannelTypeZhipu      = 16
+	ChannelTypeAli        = 17
+	ChannelTypeXunfei     = 18
+	ChannelType360        = 19
+	ChannelTypeOpenRouter = 20
 	// ChannelTypeAIProxyLibrary = 21
 	// ChannelTypeFastGPT        = 22
 	ChannelTypeTencent      = 23

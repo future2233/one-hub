@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import { Icon } from '@iconify/react';
-import { InputAdornment, OutlinedInput, Stack, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { InputAdornment, OutlinedInput, Stack, FormControl, InputLabel } from '@mui/material';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import LogType from '../type/LogType';
 import { useTranslation } from 'react-i18next';
 import 'dayjs/locale/zh-cn';
 
@@ -18,7 +17,13 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={{ xs: 3, sm: 2, md: 2 }}
+        padding={'24px'}
+        paddingBottom={'0px'}
+        sx={{ width: '100%', '& > *': { flex: 1 } }}
+      >
         <FormControl>
           <InputLabel htmlFor="channel-token_name-label">{t('tableToolBar.tokenName')}</InputLabel>
           <OutlinedInput
@@ -57,7 +62,25 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             }
           />
         </FormControl>
-
+        <FormControl>
+          <InputLabel htmlFor="channel-source_ip-label">{t('tableToolBar.sourceIp')}</InputLabel>
+          <OutlinedInput
+            id="source_ip"
+            name="source_ip"
+            sx={{
+              minWidth: '100%'
+            }}
+            label={t('tableToolBar.sourceIp')}
+            value={filterName.source_ip}
+            onChange={handleFilterName}
+            placeholder={t('tableToolBar.sourceIp')}
+            startAdornment={
+              <InputAdornment position="start">
+                <Icon icon="solar:user-bold-duotone" width="20" color={grey500} />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
             <DateTimePicker
@@ -80,7 +103,6 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             />
           </LocalizationProvider>
         </FormControl>
-
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
             <DateTimePicker
@@ -103,38 +125,15 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             />
           </LocalizationProvider>
         </FormControl>
-        <FormControl sx={{ minWidth: '22%' }}>
-          <InputLabel htmlFor="channel-log_type-label">{t('tableToolBar.type')}</InputLabel>
-          <Select
-            id="channel-type-label"
-            label={t('tableToolBar.type')}
-            value={filterName.log_type}
-            name="log_type"
-            onChange={handleFilterName}
-            sx={{
-              minWidth: '100%'
-            }}
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 200
-                }
-              }
-            }}
-          >
-            {Object.values(LogType).map((option) => {
-              return (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.text}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
       </Stack>
 
       {userIsAdmin && (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 3, sm: 2, md: 4 }}
+          padding={'24px'}
+          sx={{ width: '100%', '& > *': { flex: 1 } }}
+        >
           <FormControl>
             <InputLabel htmlFor="channel-channel_id-label">{t('tableToolBar.channelId')}</InputLabel>
             <OutlinedInput
@@ -167,26 +166,6 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
               value={filterName.username}
               onChange={handleFilterName}
               placeholder={t('tableToolBar.username')}
-              startAdornment={
-                <InputAdornment position="start">
-                  <Icon icon="solar:user-bold-duotone" width="20" color={grey500} />
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-
-          <FormControl>
-            <InputLabel htmlFor="channel-source_ip-label">{t('tableToolBar.sourceIp')}</InputLabel>
-            <OutlinedInput
-              id="source_ip"
-              name="source_ip"
-              sx={{
-                minWidth: '100%'
-              }}
-              label={t('tableToolBar.sourceIp')}
-              value={filterName.source_ip}
-              onChange={handleFilterName}
-              placeholder={t('tableToolBar.sourceIp')}
               startAdornment={
                 <InputAdornment position="start">
                   <Icon icon="solar:user-bold-duotone" width="20" color={grey500} />

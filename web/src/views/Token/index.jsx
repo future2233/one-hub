@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { showError, showSuccess, trims } from 'utils/common';
+import { showError, showSuccess, trims, copy } from 'utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,7 +19,7 @@ import { API } from 'utils/api';
 import { Icon } from '@iconify/react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';
-import { ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS } from 'constants';
+import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
 
@@ -28,18 +28,19 @@ export default function Token() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('desc');
   const [orderBy, setOrderBy] = useState('id');
-  const [rowsPerPage, setRowsPerPage] = useState(ITEMS_PER_PAGE);
+  const [rowsPerPage, setRowsPerPage] = useState(() => getPageSize('token'));
   const [listCount, setListCount] = useState(0);
   const [searching, setSearching] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [tokens, setTokens] = useState([]);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const { userGroup, loadUserGroup } = useContext(UserContext);
+  const { loadUserGroup } = useContext(UserContext);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
+  const { userGroup } = useSelector((state) => state.account);
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -54,8 +55,10 @@ export default function Token() {
   };
 
   const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
     setPage(0);
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(newRowsPerPage);
+    savePageSize('token', newRowsPerPage);
   };
 
   const searchTokens = async (event) => {
@@ -144,7 +147,7 @@ export default function Token() {
 
       return res.data;
     } catch (error) {
-      return;
+      showError(error);
     }
   };
 
@@ -168,7 +171,12 @@ export default function Token() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">{t('token_index.token')}</Typography>
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('token_index.token')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Token
+          </Typography>
+        </Stack>
 
         <Button
           variant="contained"
@@ -184,7 +192,25 @@ export default function Token() {
       <Stack mb={5}>
         <Alert severity="info">
           {t('token_index.replaceApiAddress1')}
-          <b>{siteInfo.server_address}</b>
+          <Box
+            component="span"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              margin: '0 4px',
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.12)'
+              }
+            }}
+            onClick={() => copy(siteInfo.server_address, 'API地址')}
+          >
+            <b>{siteInfo.server_address}</b>
+            <Icon icon="solar:copy-line-duotone" style={{ marginLeft: '8px', fontSize: '18px' }} />
+          </Box>
           {t('token_index.replaceApiAddress2')}
         </Alert>
       </Stack>
@@ -201,7 +227,7 @@ export default function Token() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
               <Button onClick={handleRefresh} startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>
                 {t('token_index.refresh')}

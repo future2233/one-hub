@@ -1,6 +1,6 @@
 import { showError } from './common';
 import axios from 'axios';
-import { store } from 'store/index';
+import { store } from '../store';
 import { LOGIN } from 'store/actions';
 
 export const API = axios.create({
@@ -25,3 +25,9 @@ API.interceptors.response.use(
     showError(error);
   }
 );
+
+export const LoginCheckAPI = axios.create({
+  // ... 其他代码 ...
+
+  baseURL: import.meta.env.VITE_APP_SERVER || '/'
+});

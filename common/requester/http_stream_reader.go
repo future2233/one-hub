@@ -8,6 +8,9 @@ import (
 	"one-api/common/logger"
 	"one-api/types"
 	"runtime/debug"
+	"time"
+
+	"github.com/bytedance/gopkg/util/gopool"
 )
 
 var StreamClosed = []byte("stream_closed")
@@ -36,8 +39,9 @@ type streamReader[T streamable] struct {
 }
 
 func (stream *streamReader[T]) Recv() (<-chan T, <-chan error) {
-	go func() {
+	gopool.Go(func() {
 		defer func() {
+
 			if r := recover(); r != nil {
 				logger.SysError(fmt.Sprintf("Panic in streamReader.processLines: %v", r))
 				logger.SysError(fmt.Sprintf("stacktrace from panic: %s", string(debug.Stack())))
@@ -52,7 +56,7 @@ func (stream *streamReader[T]) Recv() (<-chan T, <-chan error) {
 			}
 		}()
 		stream.processLines()
-	}()
+	})
 
 	return stream.DataChan, stream.ErrChan
 }
@@ -62,7 +66,11 @@ func (stream *streamReader[T]) processLines() {
 	for {
 		rawLine, readErr := stream.reader.ReadBytes('\n')
 		if readErr != nil {
-			stream.ErrChan <- readErr
+			select {
+			case stream.ErrChan <- readErr:
+			case <-time.After(1000 * time.Millisecond):
+				logger.SysError(fmt.Sprintf("无法发送流错误: %v", readErr))
+			}
 			return
 		}
 
