@@ -12,7 +12,6 @@ import (
 	"one-api/common/utils"
 	"one-api/providers/base"
 	"one-api/types"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
@@ -107,13 +106,15 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 	if systemContents, ok := claudeRequest.System.([]SystemContent); ok && len(systemContents) > 1 {
 		hasAdvancedSystem = true
 	}
-	
+
 	if hasAdvancedSystem && strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,max-tokens-3-5-sonnet-2024-07-15"
 	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
 		headers["anthropic-beta"] = "prompt-caching-2024-07-31,output-128k-2025-02-19"
 	} else if strings.HasPrefix(claudeRequest.Model, "claude-3-5") {
 		headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
+	} else if strings.HasPrefix(claudeRequest.Model, "claude-sonnet-4") {
+		headers["anthropic-beta"] = "prompt-caching-2024-07-31,output-128k-2025-02-19"
 	}
 
 	//if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
@@ -268,10 +269,6 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 			return nil, opErr
 		}
 
-		claudeRequest.Thinking = &Thinking{
-			Type:         "enabled",
-			BudgetTokens: budgetTokens,
-		}
 		claudeRequest.TopP = nil
 	}
 
