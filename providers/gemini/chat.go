@@ -93,6 +93,9 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 	if geminiRequest.Stream {
 		url = "streamGenerateContent?alt=sse"
 	}
+
+	effectiveModel, enableWebSearch := parseWebSearchModel(geminiRequest.Model)
+	geminiRequest.Model = effectiveModel
 	// 获取请求地址
 	fullRequestURL := p.GetFullRequestURL(url, geminiRequest.Model)
 
@@ -111,6 +114,9 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 		}
 	} else {
 		p.pluginHandle(geminiRequest)
+		if enableWebSearch {
+			ensureGoogleSearchTool(geminiRequest)
+		}
 		body = geminiRequest
 	}
 
@@ -126,6 +132,7 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatRequest, *types.OpenAIErrorWithStatusCode) {
 
 	threshold := "BLOCK_NONE"
+	modelForConfig, _ := parseWebSearchModel(request.Model)
 
 	// if strings.HasPrefix(request.Model, "gemini-2.0") && !strings.Contains(request.Model, "thinking") {
 	// 	threshold = "OFF"
@@ -163,22 +170,22 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 		},
 	}
 
-	if strings.HasPrefix(request.Model, "gemini-2.0-flash-exp") || strings.HasPrefix(request.Model, "gemini-2.5-flash-image-preview") {
+	if strings.HasPrefix(modelForConfig, "gemini-2.0-flash-exp") || strings.HasPrefix(modelForConfig, "gemini-2.5-flash-image-preview") {
 		geminiRequest.GenerationConfig.ResponseModalities = []string{"Text", "Image"}
 	}
 
-	if strings.HasSuffix(request.Model, "-tts") {
+	if strings.HasSuffix(modelForConfig, "-tts") {
 		geminiRequest.GenerationConfig.ResponseModalities = []string{"AUDIO"}
 	}
 
 	if request.Reasoning != nil {
 		thinkingConfig := &ThinkingConfig{}
-		
+
 		// Set ThinkingBudget when MaxTokens >= 0
 		if request.Reasoning.MaxTokens >= 0 {
 			thinkingConfig.ThinkingBudget = &request.Reasoning.MaxTokens
 		}
-		
+
 		// Convert effort to thinkingLevel
 		if request.Reasoning.Effort != "" {
 			effortToLevelMap := map[string]string{
@@ -191,14 +198,14 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 				thinkingConfig.ThinkingLevel = level
 			}
 		}
-		
+
 		// Only set ThinkingConfig if at least one parameter is set
 		if thinkingConfig.ThinkingBudget != nil || thinkingConfig.ThinkingLevel != "" {
 			geminiRequest.GenerationConfig.ThinkingConfig = thinkingConfig
 		}
 	}
 
-	if config.GeminiSettingsInstance.GetOpenThink(request.Model) {
+	if config.GeminiSettingsInstance.GetOpenThink(modelForConfig) {
 		if geminiRequest.GenerationConfig.ThinkingConfig == nil {
 			geminiRequest.GenerationConfig.ThinkingConfig = &ThinkingConfig{}
 		}

@@ -124,6 +124,10 @@ func (p *Pricing) GetPrice(modelName string) *Price {
 	p.RLock()
 	defer p.RUnlock()
 
+	if strings.HasSuffix(modelName, "-websearch") {
+		modelName = strings.TrimSuffix(modelName, "-websearch")
+	}
+
 	if price, ok := p.Prices[modelName]; ok {
 		return price
 	}

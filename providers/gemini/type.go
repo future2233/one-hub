@@ -667,6 +667,10 @@ type GeminiGroundingChunkWeb struct {
 
 // checks if googleSearch tool has "show" parameter
 func showGoogleSearchMeta(request *types.ChatCompletionRequest) bool {
+	if strings.HasSuffix(request.Model, webSearchModelSuffix) {
+		return true
+	}
+
 	functions := request.GetFunctions()
 	if functions == nil {
 		return false
